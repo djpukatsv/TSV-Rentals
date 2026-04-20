@@ -1,0 +1,202 @@
+import { useState } from 'react';
+
+export default function ListingPage({ listing, navigate, user }) {
+  const [form, setForm] = useState({ name: user?.name || '', email: user?.email || '', phone: '', message: '' });
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  function update(k, v) { setForm(f => ({ ...f, [k]: v })); }
+
+  async function sendEnquiry() {
+    setError('');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/enquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listingId: listing.id, ...form })
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || 'Something went wrong'); return; }
+      setSent(true);
+    } catch {
+      setError('Could not send enquiry');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (!listing) return null;
+
+  const features = [
+    { key: 'pet_friendly', label: '🐾 Pet friendly' },
+    { key: 'air_con', label: '❄️ Air conditioning' },
+    { key: 'pool', label: '🏊 Pool' },
+    { key: 'garage', label: '🚗 Garage' },
+    { key: 'furnished', label: '🛋️ Furnished' },
+    { key: 'bills_included', label: '💡 Bills included' },
+  ];
+
+  return (
+    <div className="page">
+      <div className="container" style={{ paddingTop: 24 }}>
+
+        <button
+          onClick={() => navigate('home')}
+          style={{ background: 'none', border: 'none', color: '#1a56a0', cursor: 'pointer', fontSize: 14, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 4 }}
+        >
+          ← Back to listings
+        </button>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
+
+          {/* Left column */}
+          <div>
+            {/* Image */}
+            <div style={{
+              height: 300,
+              background: listing.cover_image ? `url(${listing.cover_image}) center/cover` : 'linear-gradient(135deg, #b5d4f4, #e6f1fb)',
+              borderRadius: 10,
+              marginBottom: 20,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              {!listing.cover_image && <span style={{ fontSize: 60, opacity: 0.3 }}>🏠</span>}
+            </div>
+
+            {/* Title & price */}
+            <div style={{ marginBottom: 20 }}>
+              {listing.promoted === 1 && (
+                <span className="badge badge-amber" style={{ marginBottom: 8, display: 'inline-block' }}>Featured</span>
+              )}
+              <h1 style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>{listing.title}</h1>
+              <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 8 }}>{listing.address}, {listing.suburb} QLD {listing.postcode}</p>
+              <div style={{ fontSize: 26, fontWeight: 700, color: '#1a56a0' }}>
+                ${listing.price} <span style={{ fontSize: 15, fontWeight: 400, color: '#6b7280' }}>/ week</span>
+              </div>
+            </div>
+
+            {/* Key details */}
+            <div className="card" style={{ padding: 20, marginBottom: 20 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 14 }}>Property details</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                {[
+                  { label: 'Type', value: listing.type?.charAt(0).toUpperCase() + listing.type?.slice(1) },
+                  { label: 'Bedrooms', value: listing.bedrooms },
+                  { label: 'Bathrooms', value: listing.bathrooms },
+                  { label: 'Available', value: listing.available_date || 'Now' },
+                  { label: 'Lease', value: listing.lease_length || 'Negotiable' },
+                  { label: 'Suburb', value: listing.suburb },
+                ].map(d => (
+                  <div key={d.label}>
+                    <div style={{ fontSize: 12, color: '#6b7280' }}>{d.label}</div>
+                    <div style={{ fontSize: 14, fontWeight: 500 }}>{d.value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Features */}
+            <div className="card" style={{ padding: 20, marginBottom: 20 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 14 }}>Features</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {features.map(f => (
+                  <span
+                    key={f.key}
+                    style={{
+                      padding: '5px 12px',
+                      borderRadius: 20,
+                      fontSize: 13,
+                      background: listing[f.key] === 1 ? '#e6f1fb' : '#f3f4f6',
+                      color: listing[f.key] === 1 ? '#1a56a0' : '#9ca3af',
+                      textDecoration: listing[f.key] === 1 ? 'none' : 'line-through'
+                    }}
+                  >
+                    {f.label}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Description */}
+            {listing.description && (
+              <div className="card" style={{ padding: 20, marginBottom: 20 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 10 }}>About this property</h3>
+                <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.7 }}>{listing.description}</p>
+              </div>
+            )}
+
+            {/* Virtual tour */}
+            {listing.virtual_tour && (
+              <div className="card" style={{ padding: 20 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 10 }}>Virtual tour</h3>
+                <a href={listing.virtual_tour} target="_blank" rel="noreferrer"
+                  style={{ color: '#1a56a0', fontSize: 14 }}>
+                  🎥 View virtual tour
+                </a>
+              </div>
+            )}
+          </div>
+
+          {/* Right column — Enquiry form */}
+          <div style={{ position: 'sticky', top: 80 }}>
+            <div className="card" style={{ padding: 24 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>Enquire about this property</h3>
+              <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 20 }}>
+                Listed by {listing.landlord_name}
+              </p>
+
+              {sent ? (
+                <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                  <div style={{ fontSize: 36, marginBottom: 10 }}>✅</div>
+                  <p style={{ fontWeight: 500, marginBottom: 4 }}>Enquiry sent!</p>
+                  <p style={{ fontSize: 13, color: '#6b7280' }}>The landlord will be in touch shortly.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="form-group">
+                    <label>Your name</label>
+                    <input value={form.name} onChange={e => update('name', e.target.value)} placeholder="John Smith" />
+                  </div>
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input type="email" value={form.email} onChange={e => update('email', e.target.value)} placeholder="you@email.com" />
+                  </div>
+                  <div className="form-group">
+                    <label>Phone (optional)</label>
+                    <input value={form.phone} onChange={e => update('phone', e.target.value)} placeholder="04xx xxx xxx" />
+                  </div>
+                  <div className="form-group">
+                    <label>Message</label>
+                    <textarea
+                      value={form.message}
+                      onChange={e => update('message', e.target.value)}
+                      rows={4}
+                      placeholder="Hi, I'm interested in this property..."
+                      style={{ resize: 'vertical' }}
+                    />
+                  </div>
+                  {error && <p className="error" style={{ marginBottom: 10 }}>{error}</p>}
+                  <button
+                    onClick={sendEnquiry}
+                    disabled={loading}
+                    className="btn btn-primary"
+                    style={{ width: '100%', padding: 11, fontSize: 15 }}
+                  >
+                    {loading ? 'Sending...' : 'Send enquiry'}
+                  </button>
+                  <p style={{ fontSize: 12, color: '#9ca3af', textAlign: 'center', marginTop: 10 }}>
+                    Your details are only shared with the landlord
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
