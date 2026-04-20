@@ -37,6 +37,14 @@ export default function ListingPage({ listing, navigate, user }) {
     { key: 'bills_included', label: '💡 Bills included' },
   ];
 
+  const fullAddress = `${listing.address}, ${listing.suburb} QLD ${listing.postcode}`;
+  const encodedAddress = encodeURIComponent(fullAddress);
+  const mapsSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+  const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${listing.lat},${listing.lng}`;
+  const embedUrl = listing.lat && listing.lng
+    ? `https://maps.google.com/maps?q=${listing.lat},${listing.lng}&z=16&output=embed`
+    : `https://maps.google.com/maps?q=${encodedAddress}&z=16&output=embed`;
+
   return (
     <div className="page">
       <div className="container" style={{ paddingTop: 24 }}>
@@ -71,7 +79,7 @@ export default function ListingPage({ listing, navigate, user }) {
                 <span className="badge badge-amber" style={{ marginBottom: 8, display: 'inline-block' }}>Featured</span>
               )}
               <h1 style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>{listing.title}</h1>
-              <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 8 }}>{listing.address}, {listing.suburb} QLD {listing.postcode}</p>
+              <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 8 }}>{fullAddress}</p>
               <div style={{ fontSize: 26, fontWeight: 700, color: '#1a56a0' }}>
                 ${listing.price} <span style={{ fontSize: 15, fontWeight: 400, color: '#6b7280' }}>/ week</span>
               </div>
@@ -126,6 +134,71 @@ export default function ListingPage({ listing, navigate, user }) {
                 <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.7 }}>{listing.description}</p>
               </div>
             )}
+
+            {/* Map */}
+            <div className="card" style={{ padding: 20, marginBottom: 20 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Location</h3>
+              <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 12 }}>{fullAddress}</p>
+
+              <div style={{ borderRadius: 8, overflow: 'hidden', marginBottom: 12 }}>
+                <iframe
+                  title="Property location"
+                  src={embedUrl}
+                  width="100%"
+                  height="280"
+                  style={{ border: 0, display: 'block' }}
+                  allowFullScreen=""
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                
+                  href={mapsSearchUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    padding: '9px 14px',
+                    borderRadius: 8,
+                    background: '#1a56a0',
+                    color: '#fff',
+                    fontSize: 13,
+                    fontWeight: 500,
+                    textDecoration: 'none',
+                  }}
+                >
+                  📍 Open in Google Maps
+                </a>
+                
+                  href={streetViewUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    padding: '9px 14px',
+                    borderRadius: 8,
+                    background: '#f3f4f6',
+                    color: '#374151',
+                    fontSize: 13,
+                    fontWeight: 500,
+                    textDecoration: 'none',
+                    border: '1px solid #e5e7eb',
+                  }}
+                >
+                  🚶 Street View
+                </a>
+              </div>
+            </div>
 
             {/* Virtual tour */}
             {listing.virtual_tour && (
