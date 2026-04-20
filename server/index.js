@@ -66,4 +66,102 @@ app.post('/api/listings', requireAuth, (req, res) => {
     const id = randomUUID();
     Listings.insert.run(
       id, req.user.id, title, type, price, bedrooms, bathrooms,
-      address, suburb, postcode, lat
+      address, suburb, postcode, lat || null, lng || null,
+      description || null, availableDate || null, leaseLength || null,
+      petFriendly ? 1 : 0, airCon ? 1 : 0, pool ? 1 : 0,
+      garage ? 1 : 0, furnished ? 1 : 0, billsIncluded ? 1 : 0,
+      virtualTour || null
+    );
+    res.status(201).json({ id, success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/listings/:id', requireAuth, (req, res) => {
+  Listings.deactivate.run(req.params.id, req.user.id);
+  res.json({ success: true });
+});
+
+app.get('/api/my-listings', requireAuth, (req, res) => {
+  const listings = Listings.findByUserId.all(req.user.id);
+  res.json({ listings });
+});
+
+// ── Enquiries ─────────────────────────────────────────────────────────────────
+app.post('/api/enquiries', async (req, res) => {
+  try {
+    const { listingId, name, email, phone, message } = req.body;
+    if (!listingId || !name || !email || !message) return res.status(400).json({ error: 'Missing fields' });
+    const listing = Listings.findById.get(listingId);
+    if (!listing) return res.status(404).json({ error: 'Listing not found' });
+    const id = randomUUID();
+    Enquiries.insert.run(id, listingId, name, email, phone || null, message);
+    try {
+      await resend.emails.send({
+        from: 'TSV Rentals <noreply@tsvrentals.com.au>',
+        to: listing.landlord_email,
+        subject: `New enquiry for ${listing.title}`,
+        html: `
+          <h2>New Enquiry — ${listing.title}</h2>
+          <p><strong>From:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+          <p><strong>Message:</strong></p>
+          <p>${message}</p>
+          <hr/>
+          <p>Log in to TSV Rentals to view and manage your enquiries.</p>
+        `,
+      });
+    } catch {}
+    res.status(201).json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Saved listings ────────────────────────────────────────────────────────────
+app.post('/api/saved/:listingId', requireAuth, (req, res) => {
+  Saved.save.run(randomUUID(), req.user.id, req.params.listingId);
+  res.json({ success: true });
+});
+
+app.delete('/api/saved/:listingId', requireAuth, (req, res) => {
+  Saved.unsave.run(req.user.id, req.params.listingId);
+  res.json({ success: true });
+});
+
+app.get('/api/saved', requireAuth, (req, res) => {
+  const listings = Saved.findByUserId.all(req.user.id);
+  res.json({ listings });
+});
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+app.get('/api/admin/stats', (req, res) => {
+  const adminKey = process.env.ADMIN_KEY;
+  if (!adminKey || req.headers['x-admin-key'] !== adminKey) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  res.json({
+    totalListings: Analytics.totalListings(),
+    totalUsers: Analytics.totalUsers(),
+    totalEnquiries: Analytics.totalEnquiries(),
+    topListings: Analytics.topListings(),
+    generatedAt: new Date().toISOString(),
+  });
+});
+
+// ── Static files ──────────────────────────────────────────────────────────────
+const dist = path.join(__dirname, '../client/dist');
+app.use(express.static(dist));
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api')) return res.status(404).json({ error: 'Not found' });
+  const index = path.join(dist, 'index.html');
+  if (fs.existsSync(index)) {
+    res.sendFile(index);
+  } else {
+    res.send('<h1>TSV Rentals — server running!</h1>');
+  }
+});
+
+app.listen(PORT, () => console.log(`TSV Rentals server on http://localhost:${PORT}`));
