@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 export default function ListingPage({ listing, navigate, user }) {
   const [form, setForm] = useState({ name: user?.name || '', email: user?.email || '', phone: '', message: '' });
   const [sent, setSent] = useState(false);
