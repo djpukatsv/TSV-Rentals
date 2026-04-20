@@ -29,12 +29,12 @@ export default function ListingPage({ listing, navigate, user }) {
   if (!listing) return null;
 
   const features = [
-    { key: 'pet_friendly', label: '🐾 Pet friendly' },
-    { key: 'air_con', label: '❄️ Air conditioning' },
-    { key: 'pool', label: '🏊 Pool' },
-    { key: 'garage', label: '🚗 Garage' },
-    { key: 'furnished', label: '🛋️ Furnished' },
-    { key: 'bills_included', label: '💡 Bills included' },
+    { key: 'pet_friendly', label: 'Pet friendly' },
+    { key: 'air_con', label: 'Air conditioning' },
+    { key: 'pool', label: 'Pool' },
+    { key: 'garage', label: 'Garage' },
+    { key: 'furnished', label: 'Furnished' },
+    { key: 'bills_included', label: 'Bills included' },
   ];
 
   const fullAddress = `${listing.address}, ${listing.suburb} QLD ${listing.postcode}`;
@@ -53,7 +53,7 @@ export default function ListingPage({ listing, navigate, user }) {
           onClick={() => navigate('home')}
           style={{ background: 'none', border: 'none', color: '#1a56a0', cursor: 'pointer', fontSize: 14, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 4 }}
         >
-          ← Back to listings
+          Back to listings
         </button>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
@@ -70,7 +70,7 @@ export default function ListingPage({ listing, navigate, user }) {
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              {!listing.cover_image && <span style={{ fontSize: 60, opacity: 0.3 }}>🏠</span>}
+              {!listing.cover_image && <span style={{ fontSize: 60, opacity: 0.3 }}>house</span>}
             </div>
 
             {/* Title & price */}
@@ -163,7 +163,6 @@ export default function ListingPage({ listing, navigate, user }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 6,
                     padding: '9px 14px',
                     borderRadius: 8,
                     background: '#1a56a0',
@@ -173,7 +172,7 @@ export default function ListingPage({ listing, navigate, user }) {
                     textDecoration: 'none',
                   }}
                 >
-                  📍 Open in Google Maps
+                  Open in Google Maps
                 </a>
                 
                   href={streetViewUrl}
@@ -184,7 +183,6 @@ export default function ListingPage({ listing, navigate, user }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 6,
                     padding: '9px 14px',
                     borderRadius: 8,
                     background: '#f3f4f6',
@@ -195,7 +193,7 @@ export default function ListingPage({ listing, navigate, user }) {
                     border: '1px solid #e5e7eb',
                   }}
                 >
-                  🚶 Street View
+                  Street View
                 </a>
               </div>
             </div>
@@ -206,13 +204,13 @@ export default function ListingPage({ listing, navigate, user }) {
                 <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 10 }}>Virtual tour</h3>
                 <a href={listing.virtual_tour} target="_blank" rel="noreferrer"
                   style={{ color: '#1a56a0', fontSize: 14 }}>
-                  🎥 View virtual tour
+                  View virtual tour
                 </a>
               </div>
             )}
           </div>
 
-          {/* Right column — Enquiry form */}
+          {/* Right column - Enquiry form */}
           <div style={{ position: 'sticky', top: 80 }}>
             <div className="card" style={{ padding: 24 }}>
               <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>Enquire about this property</h3>
@@ -222,12 +220,12 @@ export default function ListingPage({ listing, navigate, user }) {
 
               {sent ? (
                 <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                  <div style={{ fontSize: 36, marginBottom: 10 }}>✅</div>
+                  <div style={{ fontSize: 36, marginBottom: 10 }}>Done</div>
                   <p style={{ fontWeight: 500, marginBottom: 4 }}>Enquiry sent!</p>
                   <p style={{ fontSize: 13, color: '#6b7280' }}>The landlord will be in touch shortly.</p>
                 </div>
               ) : (
-                <>
+                <div>
                   <div className="form-group">
                     <label>Your name</label>
                     <input value={form.name} onChange={e => update('name', e.target.value)} placeholder="John Smith" />
@@ -262,7 +260,7 @@ export default function ListingPage({ listing, navigate, user }) {
                   <p style={{ fontSize: 12, color: '#9ca3af', textAlign: 'center', marginTop: 10 }}>
                     Your details are only shared with the landlord
                   </p>
-                </>
+                </div>
               )}
             </div>
           </div>
