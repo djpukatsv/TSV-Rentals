@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function ListPropertyPage({ navigate, user }) {
   const [form, setForm] = useState({
