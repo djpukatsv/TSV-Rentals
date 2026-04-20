@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 export default function ListPropertyPage({ navigate, user }) {
   const [form, setForm] = useState({
     title: '', type: 'house', price: '', bedrooms: '', bathrooms: '',
