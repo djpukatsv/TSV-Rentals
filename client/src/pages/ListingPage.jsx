@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
 export default function ListingPage({ listing, navigate, user }) {
   const [form, setForm] = useState({ name: user?.name || '', email: user?.email || '', phone: '', message: '' });
   const [sent, setSent] = useState(false);
@@ -51,9 +52,12 @@ export default function ListingPage({ listing, navigate, user }) {
         <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: '#1a56a0', cursor: 'pointer', fontSize: 14, marginBottom: 16 }}>
           Back to listings
         </button>
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
           <div>
-            <div style={{ height: 300, background: listing.cover_image ? 'url(' + listing.cover_image + ') center/cover' : 'linear-gradient(135deg, #b5d4f4, #e6f1fb)', borderRadius: 10, marginBottom: 20 }} />
+
+            <Gallery listingId={listing.id} coverImage={listing.cover_image} />
+
             <div style={{ marginBottom: 20 }}>
               {listing.promoted === 1 && <span className="badge badge-amber" style={{ marginBottom: 8, display: 'inline-block' }}>Featured</span>}
               <h1 style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>{listing.title}</h1>
@@ -62,6 +66,7 @@ export default function ListingPage({ listing, navigate, user }) {
                 ${listing.price} <span style={{ fontSize: 15, fontWeight: 400, color: '#6b7280' }}>/ week</span>
               </div>
             </div>
+
             <div className="card" style={{ padding: 20, marginBottom: 20 }}>
               <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 14 }}>Property details</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -80,6 +85,7 @@ export default function ListingPage({ listing, navigate, user }) {
                 ))}
               </div>
             </div>
+
             <div className="card" style={{ padding: 20, marginBottom: 20 }}>
               <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 14 }}>Features</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -90,12 +96,14 @@ export default function ListingPage({ listing, navigate, user }) {
                 ))}
               </div>
             </div>
+
             {listing.description && (
               <div className="card" style={{ padding: 20, marginBottom: 20 }}>
                 <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 10 }}>About this property</h3>
                 <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.7 }}>{listing.description}</p>
               </div>
             )}
+
             <div className="card" style={{ padding: 20, marginBottom: 20 }}>
               <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Location</h3>
               <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 12 }}>{fullAddress}</p>
@@ -107,6 +115,7 @@ export default function ListingPage({ listing, navigate, user }) {
                 <button onClick={() => window.open(streetUrl, '_blank')} style={{ flex: 1, padding: '9px 14px', borderRadius: 8, background: '#f3f4f6', color: '#374151', fontSize: 13, fontWeight: 500, border: '1px solid #e5e7eb', cursor: 'pointer' }}>Street View</button>
               </div>
             </div>
+
             {listing.virtual_tour && (
               <div className="card" style={{ padding: 20 }}>
                 <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 10 }}>Virtual tour</h3>
@@ -114,6 +123,7 @@ export default function ListingPage({ listing, navigate, user }) {
               </div>
             )}
           </div>
+
           <div style={{ position: 'sticky', top: 80 }}>
             <div className="card" style={{ padding: 24 }}>
               <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>Enquire about this property</h3>
@@ -152,6 +162,50 @@ export default function ListingPage({ listing, navigate, user }) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Gallery({ listingId, coverImage }) {
+  const [images, setImages] = useState([coverImage].filter(Boolean));
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/listings/' + listingId).then(r => r.json()).then(data => {
+      if (data.images && data.images.length > 0) {
+        setImages(data.images.map(i => i.url));
+      }
+    });
+  }, [listingId]);
+
+  if (images.length === 0) {
+    return <div style={{ height: 300, background: 'linear-gradient(135deg, #b5d4f4, #e6f1fb)', borderRadius: 10, marginBottom: 20 }} />;
+  }
+
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <div style={{ position: 'relative', height: 300, borderRadius: 10, overflow: 'hidden' }}>
+        <img src={images[current]} alt="property" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        {images.length > 1 && (
+          <div>
+            <button onClick={() => setCurrent(c => (c - 1 + images.length) % images.length)} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: 36, height: 36, fontSize: 18, cursor: 'pointer' }}>{'<'}</button>
+            <button onClick={() => setCurrent(c => (c + 1) % images.length)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: 36, height: 36, fontSize: 18, cursor: 'pointer' }}>{'>'}</button>
+            <div style={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6 }}>
+              {images.map((_, i) => (
+                <button key={i} onClick={() => setCurrent(i)} style={{ width: 8, height: 8, borderRadius: '50%', border: 'none', background: i === current ? 'white' : 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: 0 }} />
+              ))}
+            </div>
+          </div>
+        )}
+        <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.5)', color: 'white', fontSize: 12, padding: '3px 8px', borderRadius: 4 }}>{current + 1} / {images.length}</div>
+      </div>
+      {images.length > 1 && (
+        <div style={{ display: 'flex', gap: 8, marginTop: 8, overflowX: 'auto' }}>
+          {images.map((img, i) => (
+            <img key={i} src={img} alt="thumb" onClick={() => setCurrent(i)} style={{ width: 70, height: 50, objectFit: 'cover', borderRadius: 6, cursor: 'pointer', border: i === current ? '2px solid #1a56a0' : '2px solid transparent', flexShrink: 0 }} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
