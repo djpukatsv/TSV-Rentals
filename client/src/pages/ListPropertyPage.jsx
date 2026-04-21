@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+
+const SUBURBS = ['Kirwan', 'Townsville City', 'Thuringowa', 'Aitkenvale', 'Mundingburra', 'Hyde Park', 'Kelso', 'Idalia', 'Hermit Park', 'North Ward', 'South Townsville', 'Belgian Gardens'];
+
 export default function ListPropertyPage({ navigate, user }) {
   const [form, setForm] = useState({
     title: '', type: 'house', price: '', bedrooms: '', bathrooms: '',
@@ -7,11 +10,21 @@ export default function ListPropertyPage({ navigate, user }) {
     petFriendly: false, airCon: false, pool: false, garage: false,
     furnished: false, billsIncluded: false, virtualTour: ''
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [preview, setPreview] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
   function update(k, v) { setForm(f => ({ ...f, [k]: v })); }
+
+  function handleImageChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImageFile(file);
+    setPreview(URL.createObjectURL(file));
+  }
 
   async function handleSubmit() {
     setError('');
@@ -25,16 +38,26 @@ export default function ListPropertyPage({ navigate, user }) {
       const token = localStorage.getItem('token');
       const res = await fetch('/api/listings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({
-          ...form,
-          price: parseInt(form.price),
-          bedrooms: parseInt(form.bedrooms),
-          bathrooms: parseInt(form.bathrooms),
-        })
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ ...form, price: parseInt(form.price), bedrooms: parseInt(form.bedrooms), bathrooms: parseInt(form.bathrooms) })
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Something went wrong'); return; }
+      if (imageFile && data.id) {
+        setUploading(true);
+        const fd = new FormData();
+        fd.append('image', imageFile);
+        const imgRes = await fetch('/api/upload', { method: 'POST', body: fd });
+        const imgData = await imgRes.json();
+        if (imgData.url) {
+          await fetch('/api/listings/' + data.id + '/image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ url: imgData.url })
+          });
+        }
+        setUploading(false);
+      }
       setSuccess(true);
     } catch {
       setError('Could not connect to server');
@@ -47,30 +70,18 @@ export default function ListPropertyPage({ navigate, user }) {
     return (
       <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 60, marginBottom: 16 }}>🎉</div>
           <h2 style={{ fontSize: 22, fontWeight: 600, marginBottom: 8 }}>Listing submitted!</h2>
           <p style={{ color: '#6b7280', marginBottom: 24 }}>Your property is now live on TSV Rentals.</p>
-          <button onClick={() => navigate('home')} className="btn btn-primary">
-            Back to listings
-          </button>
+          <button onClick={() => navigate('home')} className="btn btn-primary">Back to listings</button>
         </div>
       </div>
     );
   }
 
-  const SUBURBS = ['Kirwan', 'Townsville City', 'Thuringowa', 'Aitkenvale', 'Mundingburra', 'Hyde Park', 'Kelso', 'Idalia', 'Hermit Park', 'North Ward', 'South Townsville', 'Belgian Gardens'];
-
   return (
     <div className="page">
       <div className="container" style={{ paddingTop: 24, maxWidth: 700 }}>
-
-        <button
-          onClick={() => navigate('home')}
-          style={{ background: 'none', border: 'none', color: '#1a56a0', cursor: 'pointer', fontSize: 14, marginBottom: 16 }}
-        >
-          ← Back
-        </button>
-
+        <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: '#1a56a0', cursor: 'pointer', fontSize: 14, marginBottom: 16 }}>Back</button>
         <h1 style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>List your property</h1>
         <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 24 }}>Free to list — reach Townsville renters today</p>
 
@@ -78,21 +89,26 @@ export default function ListPropertyPage({ navigate, user }) {
           <div style={{ background: '#e6f1fb', border: '1px solid #b5d4f4', borderRadius: 8, padding: 16, marginBottom: 24 }}>
             <p style={{ fontSize: 14, color: '#1a56a0' }}>
               You need an account to list a property.{' '}
-              <span onClick={() => navigate('auth')} style={{ fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
-                Sign in or create one free
-              </span>
+              <span onClick={() => navigate('auth')} style={{ fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>Sign in or create one free</span>
             </p>
           </div>
         )}
 
         <div className="card" style={{ padding: 24, marginBottom: 20 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Property details</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Property Photo</h3>
+          {preview && <img src={preview} alt="preview" style={{ width: '100%', height: 200, objectFit: 'cover', borderRadius: 8, marginBottom: 12 }} />}
+          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: 8, border: '2px dashed #d1d5db', cursor: 'pointer', fontSize: 14, color: '#6b7280', background: '#f9fafb' }}>
+            {preview ? 'Change photo' : 'Upload a photo of your property'}
+            <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+          </label>
+        </div>
 
+        <div className="card" style={{ padding: 24, marginBottom: 20 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Property details</h3>
           <div className="form-group">
             <label>Listing title *</label>
             <input value={form.title} onChange={e => update('title', e.target.value)} placeholder="e.g. Spacious 3 bed house with pool — Kirwan" />
           </div>
-
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div className="form-group">
               <label>Property type *</label>
@@ -149,20 +165,15 @@ export default function ListPropertyPage({ navigate, user }) {
           <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Features</h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             {[
-              { key: 'petFriendly', label: '🐾 Pet friendly' },
-              { key: 'airCon', label: '❄️ Air conditioning' },
-              { key: 'pool', label: '🏊 Pool' },
-              { key: 'garage', label: '🚗 Garage' },
-              { key: 'furnished', label: '🛋️ Furnished' },
-              { key: 'billsIncluded', label: '💡 Bills included' },
+              { key: 'petFriendly', label: 'Pet friendly' },
+              { key: 'airCon', label: 'Air conditioning' },
+              { key: 'pool', label: 'Pool' },
+              { key: 'garage', label: 'Garage' },
+              { key: 'furnished', label: 'Furnished' },
+              { key: 'billsIncluded', label: 'Bills included' },
             ].map(f => (
               <label key={f.key} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14 }}>
-                <input
-                  type="checkbox"
-                  checked={form[f.key]}
-                  onChange={e => update(f.key, e.target.checked)}
-                  style={{ width: 16, height: 16, accentColor: '#1a56a0' }}
-                />
+                <input type="checkbox" checked={form[f.key]} onChange={e => update(f.key, e.target.checked)} style={{ width: 16, height: 16, accentColor: '#1a56a0' }} />
                 {f.label}
               </label>
             ))}
@@ -188,31 +199,19 @@ export default function ListPropertyPage({ navigate, user }) {
           </div>
           <div className="form-group">
             <label>Description</label>
-            <textarea
-              value={form.description}
-              onChange={e => update('description', e.target.value)}
-              rows={4}
-              placeholder="Describe the property, neighbourhood, nearby amenities..."
-              style={{ resize: 'vertical' }}
-            />
+            <textarea value={form.description} onChange={e => update('description', e.target.value)} rows={4} placeholder="Describe the property, neighbourhood, nearby amenities..." style={{ resize: 'vertical' }} />
           </div>
           <div className="form-group">
-            <label>Virtual tour link (YouTube or 360 tour)</label>
+            <label>Virtual tour link (optional)</label>
             <input value={form.virtualTour} onChange={e => update('virtualTour', e.target.value)} placeholder="https://youtube.com/..." />
           </div>
         </div>
 
         {error && <p className="error" style={{ marginBottom: 12 }}>{error}</p>}
 
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className="btn btn-primary"
-          style={{ width: '100%', padding: 14, fontSize: 16, marginBottom: 40 }}
-        >
-          {loading ? 'Submitting...' : '🏠 List my property for free'}
+        <button onClick={handleSubmit} disabled={loading || uploading} className="btn btn-primary" style={{ width: '100%', padding: 14, fontSize: 16, marginBottom: 40 }}>
+          {loading || uploading ? 'Submitting...' : 'List my property for free'}
         </button>
-
       </div>
     </div>
   );
