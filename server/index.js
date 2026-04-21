@@ -31,12 +31,32 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => cb(null, randomUUID() + path.extname(file.originalname))
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
-app.post('/api/upload', upload.single('image'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  const url = '/uploads/' + req.file.filename;
-  res.json({ url });
+app.post('/api/upload', upload.array('images', 10), (req, res) => {
+  if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'No files uploaded' });
+  const urls = req.files.map(f => '/uploads/' + f.filename);
+  res.json({ urls });
 });
 app.use('/uploads', express.static(uploadDir));
+app.post('/api/listings/:id/images', requireAuth, (req, res) => {
+  try {
+    const { urls } = req.body;
+    urls.forEach((url, i) => Images.insert.run(randomUUID(), req.params.id, url, i));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+app.post('/api/admin/listing/:id/images', (req, res) => {
+  if (req.query.key !== 'tsvadmin2026') return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const { urls } = req.body;
+    db.prepare(`DELETE FROM listing_images WHERE listing_id = ?`).run(req.params.id);
+    urls.forEach((url, i) => Images.insert.run(randomUUID(), req.params.id, url, i));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 app.get('/api/health', (req, res) => res.json({ status: 'ok', version: '1.0.0' }));
 
 app.get('/api/seed', async (req, res) => {
