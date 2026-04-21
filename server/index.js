@@ -98,7 +98,28 @@ app.post('/api/admin/listing', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
+app.put('/api/admin/listing/:id', async (req, res) => {
+  if (req.query.key !== 'tsvadmin2026') return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const { title, type, price, bedrooms, bathrooms, address, suburb, postcode, lat, lng, description, availableDate, leaseLength, petFriendly, airCon, pool, garage, furnished, billsIncluded, imageUrl, contactName, contactPhone } = req.body;
+    db.prepare(`UPDATE listings SET title=?, type=?, price=?, bedrooms=?, bathrooms=?, address=?, suburb=?, postcode=?, lat=?, lng=?, description=?, available_date=?, lease_length=?, pet_friendly=?, air_con=?, pool=?, garage=?, furnished=?, bills_included=? WHERE id=?`).run(title, type, parseInt(price), parseInt(bedrooms), parseInt(bathrooms), address, suburb, postcode, lat ? parseFloat(lat) : null, lng ? parseFloat(lng) : null, description || null, availableDate || null, leaseLength || null, petFriendly ? 1 : 0, airCon ? 1 : 0, pool ? 1 : 0, garage ? 1 : 0, furnished ? 1 : 0, billsIncluded ? 1 : 0, req.params.id);
+    if (imageUrl) {
+      const existing = db.prepare(`SELECT id FROM listing_images WHERE listing_id = ? ORDER BY position LIMIT 1`).get(req.params.id);
+      if (existing) {
+        db.prepare(`UPDATE listing_images SET url = ? WHERE id = ?`).run(imageUrl, existing.id);
+      } else {
+        db.prepare(`INSERT INTO listing_images (id, listing_id, url, position) VALUES (?, ?, ?, ?)`).run(randomUUID(), req.params.id, imageUrl, 0);
+      }
+    }
+    if (contactName) {
+      const adminEmail = 'admin@tsvrentals.internal';
+      db.prepare(`UPDATE users SET name = ?, phone = ? WHERE email = ?`).run(contactName, contactPhone || '', adminEmail);
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 app.delete('/api/admin/listing/:id', (req, res) => {
   if (req.query.key !== 'tsvadmin2026') return res.status(401).json({ error: 'Unauthorized' });
   try {
