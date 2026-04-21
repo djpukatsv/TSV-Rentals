@@ -17,7 +17,6 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// ── Static files — serve BEFORE all routes ────────────────────────────────────
 app.use(express.static(path.join(__dirname, '../client/public')));
 const dist = path.join(__dirname, '../client/dist');
 app.use(express.static(dist));
@@ -25,6 +24,7 @@ app.use(express.static(dist));
 authRoutes(app);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', version: '1.0.0' }));
+
 app.get('/api/seed', async (req, res) => {
   if (req.query.key !== 'tsvseed2026') return res.status(401).json({ error: 'Unauthorized' });
   try {
@@ -40,28 +40,70 @@ app.get('/api/seed', async (req, res) => {
       { title: 'Spacious Family Home in Kirwan', type: 'house', price: 480, bedrooms: 4, bathrooms: 2, address: '14 Bandicoot Drive', suburb: 'Kirwan', postcode: '4817', lat: -19.3167, lng: 146.7333, description: 'Large 4 bedroom family home on a quiet street in Kirwan. Fully fenced yard, double lock-up garage, and covered outdoor entertaining area. Close to Willows Shopping Centre and good schools.', available_date: '2026-05-01', lease_length: '12 months', pet_friendly: 1, air_con: 1, pool: 0, garage: 1, furnished: 0, bills_included: 0 },
       { title: 'Modern Unit Near The Strand', type: 'unit', price: 395, bedrooms: 2, bathrooms: 1, address: '3/8 Gregory Street', suburb: 'North Ward', postcode: '4810', lat: -19.2566, lng: 146.8190, description: 'Stylish 2 bedroom unit just a short walk to The Strand. Air conditioned throughout, secure parking, and a private balcony with ocean glimpses. Perfect for professionals or a couple.', available_date: '2026-04-28', lease_length: '12 months', pet_friendly: 0, air_con: 1, pool: 0, garage: 0, furnished: 0, bills_included: 0 },
       { title: 'Pool Home — Idalia', type: 'house', price: 520, bedrooms: 3, bathrooms: 2, address: '22 Flame Tree Circuit', suburb: 'Idalia', postcode: '4811', lat: -19.3300, lng: 146.7950, description: 'Beautiful 3 bedroom home with inground pool and large alfresco area. Modern kitchen, ensuite to main bedroom, and double garage. Walking distance to Stockland Aitkenvale.', available_date: '2026-05-10', lease_length: '12 months', pet_friendly: 1, air_con: 1, pool: 1, garage: 1, furnished: 0, bills_included: 0 },
-      { title: 'Affordable 2 Bed Unit — Mundingburra', type: 'unit', price: 320, bedrooms: 2, bathrooms: 1, address: '7/45 Ross River Road', suburb: 'Mundingburra', postcode: '4812', lat: -19.2950, lng: 146.7900, description: 'Well-maintained 2 bedroom unit in a quiet complex. Air conditioning in living area, single car space, and within walking distance to shops and public transport.', available_date: '2026-04-25', lease_length: '6 months', pet_friendly: 0, air_con: 1, pool: 0, garage: 0, furnished: 0, bills_included: 0 },
-      { title: 'Furnished Studio — City Centre', type: 'studio', price: 265, bedrooms: 1, bathrooms: 1, address: '12/99 Flinders Street', suburb: 'Townsville City', postcode: '4810', lat: -19.2590, lng: 146.8169, description: 'Fully furnished studio apartment in the heart of Townsville CBD. All utilities included. Perfect for FIFO workers or short-term stays. Secure building with intercom.', available_date: '2026-04-22', lease_length: '3 months', pet_friendly: 0, air_con: 1, pool: 0, garage: 0, furnished: 1, bills_included: 1 },
-      { title: 'Large Family Home with Granny Flat — Kelso', type: 'house', price: 550, bedrooms: 4, bathrooms: 2, address: '5 Bottlebrush Crescent', suburb: 'Kelso', postcode: '4815', lat: -19.3750, lng: 146.7600, description: '4 bedroom main house plus a self-contained granny flat on a large 800sqm block. Ideal for extended families. Fully fenced, pet friendly.', available_date: '2026-05-15', lease_length: '12 months', pet_friendly: 1, air_con: 1, pool: 0, garage: 1, furnished: 0, bills_included: 0 },
-      { title: 'Neat 3 Bed House — Thuringowa Central', type: 'house', price: 430, bedrooms: 3, bathrooms: 1, address: '18 Hummock Road', suburb: 'Thuringowa Central', postcode: '4817', lat: -19.3400, lng: 146.7100, description: 'Well-presented 3 bedroom home. Fresh paint, new carpets, air conditioning, and a covered patio. Close to Stockland, schools, and public transport.', available_date: '2026-05-01', lease_length: '12 months', pet_friendly: 1, air_con: 1, pool: 0, garage: 0, furnished: 0, bills_included: 0 },
-      { title: 'Highset Queenslander — Hyde Park', type: 'house', price: 460, bedrooms: 3, bathrooms: 1, address: '34 Victoria Street', suburb: 'Hyde Park', postcode: '4812', lat: -19.2800, lng: 146.8050, description: 'Charming highset Queenslander with polished timber floors and a large wraparound verandah. Separate laundry, garden shed, street parking. Close to The Strand.', available_date: '2026-05-05', lease_length: '12 months', pet_friendly: 1, air_con: 1, pool: 0, garage: 0, furnished: 0, bills_included: 0 },
-      { title: 'Brand New Townhouse — Bohle Plains', type: 'townhouse', price: 445, bedrooms: 3, bathrooms: 2, address: '2/15 Sugarcane Way', suburb: 'Bohle Plains', postcode: '4817', lat: -19.3050, lng: 146.6950, description: 'Brand new 3 bedroom townhouse, never been lived in. Modern finishes, open plan living, ensuite to master, single lock-up garage and courtyard.', available_date: '2026-05-20', lease_length: '12 months', pet_friendly: 0, air_con: 1, pool: 0, garage: 1, furnished: 0, bills_included: 0 },
-      { title: 'Beachside 2 Bed Unit — Belgian Gardens', type: 'unit', price: 420, bedrooms: 2, bathrooms: 1, address: '4/6 Paxton Street', suburb: 'Belgian Gardens', postcode: '4810', lat: -19.2466, lng: 146.8066, description: '2 bedroom unit just 2 blocks from the beach at Belgian Gardens. Renovated kitchen and bathroom, air conditioning, covered parking.', available_date: '2026-05-01', lease_length: '12 months', pet_friendly: 0, air_con: 1, pool: 0, garage: 0, furnished: 0, bills_included: 0 },
-      { title: 'Hermit Park 3 Bed — Great Value', type: 'house', price: 380, bedrooms: 3, bathrooms: 1, address: '27 Seventh Avenue', suburb: 'Hermit Park', postcode: '4812', lat: -19.2900, lng: 146.8000, description: '3 bedroom lowset home on a large block. Air conditioning, fully fenced yard. Close to Castletown Shoppingworld and public transport.', available_date: '2026-04-30', lease_length: '12 months', pet_friendly: 1, air_con: 1, pool: 0, garage: 0, furnished: 0, bills_included: 0 },
-      { title: 'Executive Home with Pool — Castle Hill', type: 'house', price: 750, bedrooms: 4, bathrooms: 3, address: '9 Hillcrest Drive', suburb: 'Castle Hill', postcode: '4810', lat: -19.2650, lng: 146.8100, description: 'Stunning executive home with panoramic views of Townsville and Magnetic Island. Gourmet kitchen, home theatre, resort-style pool. Double garage. Furnished.', available_date: '2026-05-10', lease_length: '12 months', pet_friendly: 0, air_con: 1, pool: 1, garage: 1, furnished: 1, bills_included: 0 },
     ];
     const insertListing = db.prepare(`INSERT INTO listings (id, user_id, title, type, price, bedrooms, bathrooms, address, suburb, postcode, lat, lng, description, available_date, lease_length, pet_friendly, air_con, pool, garage, furnished, bills_included, virtual_tour) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
     const insertImage = db.prepare(`INSERT INTO listing_images (id, listing_id, url, position) VALUES (?, ?, ?, ?)`);
-    const imgs = ['https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800','https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800','https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800','https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800','https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800'];
+    const imgs = ['https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800','https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800','https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800'];
     let i = 0;
     for (const l of listings) {
       const id = randomUUID();
       insertListing.run(id, landlord.id, l.title, l.type, l.price, l.bedrooms, l.bathrooms, l.address, l.suburb, l.postcode, l.lat, l.lng, l.description, l.available_date, l.lease_length, l.pet_friendly, l.air_con, l.pool, l.garage, l.furnished, l.bills_included, null);
       insertImage.run(randomUUID(), id, imgs[i % imgs.length], 0);
-      insertImage.run(randomUUID(), id, imgs[(i+1) % imgs.length], 1);
       i++;
     }
-    res.json({ success: true, message: `${listings.length} listings seeded!` });
+    res.json({ success: true, message: listings.length + ' listings seeded!' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/clearseed', async (req, res) => {
+  if (req.query.key !== 'tsvseed2026') return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    db.prepare(`DELETE FROM listing_images WHERE listing_id IN (SELECT id FROM listings WHERE user_id = (SELECT id FROM users WHERE email = 'landlord@tsvrentals.com.au'))`).run();
+    db.prepare(`DELETE FROM listings WHERE user_id = (SELECT id FROM users WHERE email = 'landlord@tsvrentals.com.au')`).run();
+    db.prepare(`DELETE FROM users WHERE email = 'landlord@tsvrentals.com.au'`).run();
+    res.json({ success: true, message: 'Seed data cleared!' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Admin listing endpoint (no auth required, key protected) ──────────────────
+app.post('/api/admin/listing', async (req, res) => {
+  if (req.query.key !== 'tsvadmin2026') return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const { title, type, price, bedrooms, bathrooms, address, suburb, postcode, lat, lng, description, availableDate, leaseLength, petFriendly, airCon, pool, garage, furnished, billsIncluded, imageUrl, contactName, contactEmail, contactPhone } = req.body;
+    if (!title || !type || !price || !bedrooms || !bathrooms || !address || !suburb || !postcode) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    const bcrypt = await import('bcryptjs');
+    const adminEmail = 'admin@tsvrentals.internal';
+    let adminUser = db.prepare(`SELECT id FROM users WHERE email = ?`).get(adminEmail);
+    if (!adminUser) {
+      const adminId = randomUUID();
+      const hashedPassword = bcrypt.default.hashSync(randomUUID(), 10);
+      db.prepare(`INSERT INTO users (id, email, password, name, phone, role) VALUES (?, ?, ?, ?, ?, ?)`).run(adminId, adminEmail, hashedPassword, contactName || 'TSV Rentals', contactPhone || '', 'user');
+      adminUser = { id: adminId };
+    } else {
+      if (contactName) db.prepare(`UPDATE users SET name = ?, phone = ? WHERE email = ?`).run(contactName, contactPhone || '', adminEmail);
+    }
+    const id = randomUUID();
+    Listings.insert.run(id, adminUser.id, title, type, parseInt(price), parseInt(bedrooms), parseInt(bathrooms), address, suburb, postcode, lat ? parseFloat(lat) : null, lng ? parseFloat(lng) : null, description || null, availableDate || null, leaseLength || null, petFriendly ? 1 : 0, airCon ? 1 : 0, pool ? 1 : 0, garage ? 1 : 0, furnished ? 1 : 0, billsIncluded ? 1 : 0, null);
+    if (imageUrl) {
+      Images.insert.run(randomUUID(), id, imageUrl, 0);
+    }
+    res.status(201).json({ success: true, id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/admin/listing/:id', (req, res) => {
+  if (req.query.key !== 'tsvadmin2026') return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    db.prepare(`UPDATE listings SET active = 0 WHERE id = ?`).run(req.params.id);
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -102,23 +144,12 @@ app.get('/api/listings/:id', (req, res) => {
 
 app.post('/api/listings', requireAuth, (req, res) => {
   try {
-    const {
-      title, type, price, bedrooms, bathrooms, address, suburb, postcode,
-      lat, lng, description, availableDate, leaseLength,
-      petFriendly, airCon, pool, garage, furnished, billsIncluded, virtualTour
-    } = req.body;
+    const { title, type, price, bedrooms, bathrooms, address, suburb, postcode, lat, lng, description, availableDate, leaseLength, petFriendly, airCon, pool, garage, furnished, billsIncluded, virtualTour } = req.body;
     if (!title || !type || !price || !bedrooms || !bathrooms || !address || !suburb || !postcode) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     const id = randomUUID();
-    Listings.insert.run(
-      id, req.user.id, title, type, price, bedrooms, bathrooms,
-      address, suburb, postcode, lat || null, lng || null,
-      description || null, availableDate || null, leaseLength || null,
-      petFriendly ? 1 : 0, airCon ? 1 : 0, pool ? 1 : 0,
-      garage ? 1 : 0, furnished ? 1 : 0, billsIncluded ? 1 : 0,
-      virtualTour || null
-    );
+    Listings.insert.run(id, req.user.id, title, type, price, bedrooms, bathrooms, address, suburb, postcode, lat || null, lng || null, description || null, availableDate || null, leaseLength || null, petFriendly ? 1 : 0, airCon ? 1 : 0, pool ? 1 : 0, garage ? 1 : 0, furnished ? 1 : 0, billsIncluded ? 1 : 0, virtualTour || null);
     res.status(201).json({ id, success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -148,17 +179,8 @@ app.post('/api/enquiries', async (req, res) => {
       await resend.emails.send({
         from: 'TSV Rentals <noreply@tsvrentals.com.au>',
         to: listing.landlord_email,
-        subject: `New enquiry for ${listing.title}`,
-        html: `
-          <h2>New Enquiry — ${listing.title}</h2>
-          <p><strong>From:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
-          <p><strong>Message:</strong></p>
-          <p>${message}</p>
-          <hr/>
-          <p>Log in to TSV Rentals to view and manage your enquiries.</p>
-        `,
+        subject: 'New enquiry for ' + listing.title,
+        html: '<h2>New Enquiry — ' + listing.title + '</h2><p><strong>From:</strong> ' + name + '</p><p><strong>Email:</strong> ' + email + '</p><p><strong>Phone:</strong> ' + (phone || 'Not provided') + '</p><p><strong>Message:</strong></p><p>' + message + '</p>',
       });
     } catch {}
     res.status(201).json({ success: true });
@@ -183,7 +205,7 @@ app.get('/api/saved', requireAuth, (req, res) => {
   res.json({ listings });
 });
 
-// ── Admin ─────────────────────────────────────────────────────────────────────
+// ── Admin stats ───────────────────────────────────────────────────────────────
 app.get('/api/admin/stats', (req, res) => {
   const adminKey = process.env.ADMIN_KEY;
   if (!adminKey || req.headers['x-admin-key'] !== adminKey) {
@@ -198,7 +220,7 @@ app.get('/api/admin/stats', (req, res) => {
   });
 });
 
-// ── Catch-all — serve React app ───────────────────────────────────────────────
+// ── Catch-all ─────────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
   if (req.path.startsWith('/api')) return res.status(404).json({ error: 'Not found' });
   const index = path.join(dist, 'index.html');
@@ -209,4 +231,4 @@ app.get('*', (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`TSV Rentals server on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log('TSV Rentals server on http://localhost:' + PORT));
