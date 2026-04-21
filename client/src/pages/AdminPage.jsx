@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const SUBURBS = ['Kirwan', 'Townsville City', 'Thuringowa', 'Aitkenvale', 'Mundingburra', 'Hyde Park', 'Kelso', 'Idalia', 'Hermit Park', 'North Ward', 'South Townsville', 'Belgian Gardens', 'Bohle Plains', 'Castle Hill', 'Rosslea', 'Cranbrook', 'Heatley', 'Annandale', 'Wulguru', 'Rasmussen'];
 
-const empty = { title: '', type: 'house', price: '', bedrooms: '', bathrooms: '', address: '', suburb: 'Kirwan', postcode: '', description: '', availableDate: '', leaseLength: '12 months', petFriendly: false, airCon: false, pool: false, garage: false, furnished: false, billsIncluded: false, imageUrl: '', contactName: 'TSV Rentals', contactEmail: '', contactPhone: '' };
+const empty = { title: '', type: 'house', price: '', bedrooms: '', bathrooms: '', address: '', suburb: 'Kirwan', postcode: '', description: '', availableDate: '', leaseLength: '12 months', petFriendly: false, airCon: false, pool: false, garage: false, furnished: false, billsIncluded: false, imageUrl: '', contactName: 'TSV Rentals', contactPhone: '' };
 
 export default function AdminPage({ navigate }) {
   const [form, setForm] = useState(empty);
@@ -10,6 +10,7 @@ export default function AdminPage({ navigate }) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => { fetchListings(); }, []);
 
@@ -21,23 +22,62 @@ export default function AdminPage({ navigate }) {
 
   function update(k, v) { setForm(f => ({ ...f, [k]: v })); }
 
+  function startEdit(listing) {
+    setEditingId(listing.id);
+    setForm({
+      title: listing.title || '',
+      type: listing.type || 'house',
+      price: listing.price || '',
+      bedrooms: listing.bedrooms || '',
+      bathrooms: listing.bathrooms || '',
+      address: listing.address || '',
+      suburb: listing.suburb || 'Kirwan',
+      postcode: listing.postcode || '',
+      description: listing.description || '',
+      availableDate: listing.available_date || '',
+      leaseLength: listing.lease_length || '12 months',
+      petFriendly: listing.pet_friendly === 1,
+      airCon: listing.air_con === 1,
+      pool: listing.pool === 1,
+      garage: listing.garage === 1,
+      furnished: listing.furnished === 1,
+      billsIncluded: listing.bills_included === 1,
+      imageUrl: listing.cover_image || '',
+      contactName: listing.landlord_name || 'TSV Rentals',
+      contactPhone: listing.landlord_phone || '',
+    });
+    window.scrollTo(0, 0);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setForm(empty);
+    setError('');
+    setSuccess('');
+  }
+
   async function submit() {
     setError('');
     setSuccess('');
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/listing?key=tsvadmin2026', {
-        method: 'POST',
+      const url = editingId
+        ? '/api/admin/listing/' + editingId + '?key=tsvadmin2026'
+        : '/api/admin/listing?key=tsvadmin2026';
+      const method = editingId ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Something went wrong'); return; }
-      setSuccess('Listing added successfully!');
+      setSuccess(editingId ? 'Listing updated!' : 'Listing added!');
       setForm(empty);
+      setEditingId(null);
       fetchListings();
     } catch {
-      setError('Could not add listing');
+      setError('Could not save listing');
     } finally {
       setLoading(false);
     }
@@ -46,6 +86,7 @@ export default function AdminPage({ navigate }) {
   async function deleteListing(id) {
     if (!confirm('Remove this listing?')) return;
     await fetch('/api/admin/listing/' + id + '?key=tsvadmin2026', { method: 'DELETE' });
+    if (editingId === id) cancelEdit();
     fetchListings();
   }
 
@@ -66,15 +107,20 @@ export default function AdminPage({ navigate }) {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '24px 20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1a56a0' }}>Admin — Add Listing</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1a56a0' }}>Admin — {editingId ? 'Edit Listing' : 'Add Listing'}</h1>
         <button onClick={() => navigate('home')} style={{ background: 'none', border: '1px solid #d1d5db', borderRadius: 6, padding: '6px 14px', cursor: 'pointer', fontSize: 13 }}>Back to site</button>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }}>
 
         {/* Form */}
-        <div style={{ background: 'white', borderRadius: 10, padding: 24, border: '1px solid #e5e7eb' }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 20 }}>New Listing</h2>
+        <div style={{ background: 'white', borderRadius: 10, padding: 24, border: editingId ? '2px solid #1a56a0' : '1px solid #e5e7eb' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 600 }}>{editingId ? 'Editing Listing' : 'New Listing'}</h2>
+            {editingId && (
+              <button onClick={cancelEdit} style={{ background: '#f3f4f6', border: 'none', borderRadius: 6, padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>Cancel edit</button>
+            )}
+          </div>
 
           {input('Title', 'title', 'text', 'e.g. Spacious 3 Bed House — Kirwan')}
 
@@ -140,7 +186,7 @@ export default function AdminPage({ navigate }) {
             </div>
           </div>
 
-          {input('Photo URL (optional)', 'imageUrl', 'text', 'https://i.ibb.co/...')}
+          {input('Photo URL', 'imageUrl', 'text', 'https://i.ibb.co/...')}
 
           <div style={{ background: '#f9fafb', borderRadius: 8, padding: 16, marginBottom: 14 }}>
             <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>Features</p>
@@ -163,8 +209,8 @@ export default function AdminPage({ navigate }) {
           {error && <p style={{ color: '#dc2626', fontSize: 13, marginBottom: 10 }}>{error}</p>}
           {success && <p style={{ color: '#16a34a', fontSize: 13, marginBottom: 10 }}>{success}</p>}
 
-          <button onClick={submit} disabled={loading} style={{ width: '100%', padding: '11px', background: '#1a56a0', color: 'white', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer' }}>
-            {loading ? 'Adding...' : 'Add Listing'}
+          <button onClick={submit} disabled={loading} style={{ width: '100%', padding: 11, background: editingId ? '#16a34a' : '#1a56a0', color: 'white', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer' }}>
+            {loading ? 'Saving...' : editingId ? 'Save Changes' : 'Add Listing'}
           </button>
         </div>
 
@@ -172,14 +218,17 @@ export default function AdminPage({ navigate }) {
         <div>
           <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Current Listings ({listings.length})</h2>
           {listings.map(l => (
-            <div key={l.id} style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 16px', marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 500 }}>{l.title}</div>
-                <div style={{ fontSize: 12, color: '#6b7280' }}>{l.suburb} — ${l.price}/wk — {l.bedrooms} bed</div>
+            <div key={l.id} style={{ background: 'white', border: editingId === l.id ? '2px solid #1a56a0' : '1px solid #e5e7eb', borderRadius: 8, padding: '12px 16px', marginBottom: 10 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 500 }}>{l.title}</div>
+                  <div style={{ fontSize: 12, color: '#6b7280' }}>{l.suburb} — ${l.price}/wk — {l.bedrooms} bed</div>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => startEdit(l)} style={{ background: '#e0f0ff', color: '#1a56a0', border: 'none', borderRadius: 6, padding: '5px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 500 }}>Edit</button>
+                  <button onClick={() => deleteListing(l.id)} style={{ background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: 6, padding: '5px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 500 }}>Remove</button>
+                </div>
               </div>
-              <button onClick={() => deleteListing(l.id)} style={{ background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: 6, padding: '5px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 500 }}>
-                Remove
-              </button>
             </div>
           ))}
           {listings.length === 0 && <p style={{ fontSize: 14, color: '#6b7280' }}>No listings yet.</p>}
