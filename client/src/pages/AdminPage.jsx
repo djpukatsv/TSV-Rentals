@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const SUBURBS = ['Kirwan', 'Townsville City', 'Thuringowa', 'Aitkenvale', 'Mundingburra', 'Hyde Park', 'Kelso', 'Idalia', 'Hermit Park', 'North Ward', 'South Townsville', 'Belgian Gardens', 'Bohle Plains', 'Castle Hill', 'Rosslea', 'Cranbrook', 'Heatley', 'Annandale', 'Wulguru', 'Rasmussen'];
-const empty = { title: '', type: 'house', price: '', bedrooms: '', bathrooms: '', address: '', suburb: 'Kirwan', postcode: '', description: '', availableDate: '', leaseLength: '12 months', petFriendly: false, airCon: false, pool: false, garage: false, furnished: false, billsIncluded: false, imageUrl: '', contactName: 'TSV Rentals', contactPhone: '' };
+const empty = { title: '', type: 'house', price: '', bedrooms: '', bathrooms: '', address: '', suburb: 'Kirwan', postcode: '', description: '', availableDate: '', leaseLength: '12 months', petFriendly: false, airCon: false, pool: false, garage: false, furnished: false, billsIncluded: false, contactName: 'TSV Rentals', contactPhone: '' };
 
 export default function AdminPage({ navigate }) {
   const [form, setForm] = useState(empty);
@@ -11,7 +11,8 @@ export default function AdminPage({ navigate }) {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [editingId, setEditingId] = useState(null);
-  const [preview, setPreview] = useState('');
+  const [imageFiles, setImageFiles] = useState([]);
+  const [previews, setPreviews] = useState([]);
 
   useEffect(() => { fetchListings(); }, []);
 
@@ -23,20 +24,36 @@ export default function AdminPage({ navigate }) {
 
   function update(k, v) { setForm(f => ({ ...f, [k]: v })); }
 
-  async function handleImageUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+  function handleImageChange(e) {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setImageFiles(files);
+    setPreviews(files.map(f => URL.createObjectURL(f)));
+  }
+
+  function removePreview(i) {
+    setImageFiles(prev => prev.filter((_, idx) => idx !== i));
+    setPreviews(prev => prev.filter((_, idx) => idx !== i));
+  }
+
+  async function uploadImages(listingId, isAdmin = true) {
+    if (!imageFiles.length) return;
     setUploading(true);
-    setPreview(URL.createObjectURL(file));
     try {
       const fd = new FormData();
-      fd.append('image', file);
+      imageFiles.forEach(f => fd.append('images', f));
       const res = await fetch('/api/upload', { method: 'POST', body: fd });
       const data = await res.json();
-      if (data.url) { update('imageUrl', data.url); }
-      else setError('Image upload failed');
-    } catch {
-      setError('Image upload failed');
+      if (data.urls) {
+        const endpoint = isAdmin
+          ? '/api/admin/listing/' + listingId + '/images?key=tsvadmin2026'
+          : '/api/listings/' + listingId + '/images';
+        await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ urls: data.urls })
+        });
+      }
     } finally {
       setUploading(false);
     }
@@ -44,7 +61,8 @@ export default function AdminPage({ navigate }) {
 
   function startEdit(listing) {
     setEditingId(listing.id);
-    setPreview(listing.cover_image || '');
+    setImageFiles([]);
+    setPreviews(listing.cover_image ? [listing.cover_image] : []);
     setForm({
       title: listing.title || '', type: listing.type || 'house', price: listing.price || '',
       bedrooms: listing.bedrooms || '', bathrooms: listing.bathrooms || '',
@@ -54,7 +72,6 @@ export default function AdminPage({ navigate }) {
       petFriendly: listing.pet_friendly === 1, airCon: listing.air_con === 1,
       pool: listing.pool === 1, garage: listing.garage === 1,
       furnished: listing.furnished === 1, billsIncluded: listing.bills_included === 1,
-      imageUrl: listing.cover_image || '',
       contactName: listing.landlord_name || 'TSV Rentals',
       contactPhone: listing.landlord_phone || '',
     });
@@ -64,7 +81,8 @@ export default function AdminPage({ navigate }) {
   function cancelEdit() {
     setEditingId(null);
     setForm(empty);
-    setPreview('');
+    setImageFiles([]);
+    setPreviews([]);
     setError('');
     setSuccess('');
   }
@@ -79,10 +97,13 @@ export default function AdminPage({ navigate }) {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Something went wrong'); return; }
+      const listingId = editingId || data.id;
+      await uploadImages(listingId, true);
       setSuccess(editingId ? 'Listing updated!' : 'Listing added!');
       setForm(empty);
       setEditingId(null);
-      setPreview('');
+      setImageFiles([]);
+      setPreviews([]);
       fetchListings();
     } catch {
       setError('Could not save listing');
@@ -126,13 +147,24 @@ export default function AdminPage({ navigate }) {
             {editingId && <button onClick={cancelEdit} style={{ background: '#f3f4f6', border: 'none', borderRadius: 6, padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>Cancel</button>}
           </div>
 
-          {/* Image upload */}
           <div style={{ marginBottom: 20 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 8, color: '#374151' }}>Property Photo</label>
-            {preview && <img src={preview} alt="preview" style={{ width: '100%', height: 160, objectFit: 'cover', borderRadius: 8, marginBottom: 8 }} />}
-            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '10px', borderRadius: 8, border: '2px dashed #d1d5db', cursor: 'pointer', fontSize: 14, color: '#6b7280', background: '#f9fafb' }}>
-              {uploading ? 'Uploading...' : preview ? 'Change photo' : 'Upload photo from device'}
-              <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 8, color: '#374151' }}>Photos (up to 10)</label>
+            {previews.length > 0 && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 10 }}>
+                {previews.map((p, i) => (
+                  <div key={i} style={{ position: 'relative' }}>
+                    <img src={p} alt="preview" style={{ width: '100%', height: 80, objectFit: 'cover', borderRadius: 6 }} />
+                    {imageFiles.length > 0 && (
+                      <button onClick={() => removePreview(i)} style={{ position: 'absolute', top: 3, right: 3, background: 'rgba(0,0,0,0.6)', color: 'white', border: 'none', borderRadius: '50%', width: 20, height: 20, fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>x</button>
+                    )}
+                    {i === 0 && <span style={{ position: 'absolute', bottom: 3, left: 3, background: '#1a56a0', color: 'white', fontSize: 10, padding: '1px 6px', borderRadius: 4 }}>Cover</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 10, borderRadius: 8, border: '2px dashed #d1d5db', cursor: 'pointer', fontSize: 14, color: '#6b7280', background: '#f9fafb' }}>
+              {uploading ? 'Uploading...' : previews.length > 0 ? 'Add more photos' : 'Upload photos from device'}
+              <input type="file" accept="image/*" multiple onChange={handleImageChange} style={{ display: 'none' }} />
             </label>
           </div>
 
@@ -222,7 +254,7 @@ export default function AdminPage({ navigate }) {
           {success && <p style={{ color: '#16a34a', fontSize: 13, marginBottom: 10 }}>{success}</p>}
 
           <button onClick={submit} disabled={loading || uploading} style={{ width: '100%', padding: 11, background: editingId ? '#16a34a' : '#1a56a0', color: 'white', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>
-            {loading ? 'Saving...' : editingId ? 'Save Changes' : 'Add Listing'}
+            {loading || uploading ? 'Saving...' : editingId ? 'Save Changes' : 'Add Listing'}
           </button>
         </div>
 
