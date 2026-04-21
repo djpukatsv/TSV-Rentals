@@ -15,7 +15,11 @@ export default function App() {
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
     if (token && savedUser) setUser(JSON.parse(savedUser));
-    if (window.location.search.includes('key=tsvadmin2026')) setPage('admin');
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('key') === 'tsvadmin2026') {
+      setPage('admin');
+      window.history.replaceState({}, '', '/');
+    }
   }, []);
 
   const navigate = (to, data = null) => {
