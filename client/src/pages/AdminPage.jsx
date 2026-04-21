@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const SUBURBS = ['Kirwan', 'Townsville City', 'Thuringowa', 'Aitkenvale', 'Mundingburra', 'Hyde Park', 'Kelso', 'Idalia', 'Hermit Park', 'North Ward', 'South Townsville', 'Belgian Gardens', 'Bohle Plains', 'Castle Hill', 'Rosslea', 'Cranbrook', 'Heatley', 'Annandale', 'Wulguru', 'Rasmussen'];
-const empty = { title: '', type: 'house', price: '', bedrooms: '', bathrooms: '', address: '', suburb: 'Kirwan', postcode: '', description: '', availableDate: '', leaseLength: '12 months', petFriendly: false, airCon: false, pool: false, garage: false, furnished: false, billsIncluded: false, contactName: 'TSV Rentals', contactPhone: '' };
+const empty = { title: '', type: 'house', price: '', bedrooms: '', bathrooms: '', address: '', suburb: 'Kirwan', postcode: '', description: '', availableDate: '', leaseLength: '12 months', petFriendly: false, airCon: false, pool: false, garage: false, furnished: false, billsIncluded: false, imageUrl: '', contactName: 'TSV Rentals', contactPhone: '' };
 
 export default function AdminPage({ navigate }) {
   const [form, setForm] = useState(empty);
@@ -29,6 +29,7 @@ export default function AdminPage({ navigate }) {
     if (!files.length) return;
     setImageFiles(files);
     setPreviews(files.map(f => URL.createObjectURL(f)));
+    setForm(f => ({ ...f, imageUrl: '' }));
   }
 
   function removePreview(i) {
@@ -36,7 +37,7 @@ export default function AdminPage({ navigate }) {
     setPreviews(prev => prev.filter((_, idx) => idx !== i));
   }
 
-  async function uploadImages(listingId, isAdmin = true) {
+  async function uploadImages(listingId) {
     if (!imageFiles.length) return;
     setUploading(true);
     try {
@@ -45,15 +46,14 @@ export default function AdminPage({ navigate }) {
       const res = await fetch('/api/upload', { method: 'POST', body: fd });
       const data = await res.json();
       if (data.urls) {
-        const endpoint = isAdmin
-          ? '/api/admin/listing/' + listingId + '/images?key=tsvadmin2026'
-          : '/api/listings/' + listingId + '/images';
-        await fetch(endpoint, {
+        await fetch('/api/admin/listing/' + listingId + '/images?key=tsvadmin2026', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ urls: data.urls })
         });
       }
+    } catch {
+      setError('Image upload failed');
     } finally {
       setUploading(false);
     }
@@ -64,14 +64,24 @@ export default function AdminPage({ navigate }) {
     setImageFiles([]);
     setPreviews(listing.cover_image ? [listing.cover_image] : []);
     setForm({
-      title: listing.title || '', type: listing.type || 'house', price: listing.price || '',
-      bedrooms: listing.bedrooms || '', bathrooms: listing.bathrooms || '',
-      address: listing.address || '', suburb: listing.suburb || 'Kirwan',
-      postcode: listing.postcode || '', description: listing.description || '',
-      availableDate: listing.available_date || '', leaseLength: listing.lease_length || '12 months',
-      petFriendly: listing.pet_friendly === 1, airCon: listing.air_con === 1,
-      pool: listing.pool === 1, garage: listing.garage === 1,
-      furnished: listing.furnished === 1, billsIncluded: listing.bills_included === 1,
+      title: listing.title || '',
+      type: listing.type || 'house',
+      price: listing.price || '',
+      bedrooms: listing.bedrooms || '',
+      bathrooms: listing.bathrooms || '',
+      address: listing.address || '',
+      suburb: listing.suburb || 'Kirwan',
+      postcode: listing.postcode || '',
+      description: listing.description || '',
+      availableDate: listing.available_date || '',
+      leaseLength: listing.lease_length || '12 months',
+      petFriendly: listing.pet_friendly === 1,
+      airCon: listing.air_con === 1,
+      pool: listing.pool === 1,
+      garage: listing.garage === 1,
+      furnished: listing.furnished === 1,
+      billsIncluded: listing.bills_included === 1,
+      imageUrl: listing.cover_image || '',
       contactName: listing.landlord_name || 'TSV Rentals',
       contactPhone: listing.landlord_phone || '',
     });
@@ -92,13 +102,19 @@ export default function AdminPage({ navigate }) {
     setSuccess('');
     setLoading(true);
     try {
-      const url = editingId ? '/api/admin/listing/' + editingId + '?key=tsvadmin2026' : '/api/admin/listing?key=tsvadmin2026';
+      const url = editingId
+        ? '/api/admin/listing/' + editingId + '?key=tsvadmin2026'
+        : '/api/admin/listing?key=tsvadmin2026';
       const method = editingId ? 'PUT' : 'POST';
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Something went wrong'); return; }
       const listingId = editingId || data.id;
-      await uploadImages(listingId, true);
+      if (imageFiles.length > 0) await uploadImages(listingId);
       setSuccess(editingId ? 'Listing updated!' : 'Listing added!');
       setForm(empty);
       setEditingId(null);
@@ -155,7 +171,7 @@ export default function AdminPage({ navigate }) {
                   <div key={i} style={{ position: 'relative' }}>
                     <img src={p} alt="preview" style={{ width: '100%', height: 80, objectFit: 'cover', borderRadius: 6 }} />
                     {imageFiles.length > 0 && (
-                      <button onClick={() => removePreview(i)} style={{ position: 'absolute', top: 3, right: 3, background: 'rgba(0,0,0,0.6)', color: 'white', border: 'none', borderRadius: '50%', width: 20, height: 20, fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>x</button>
+                      <button onClick={() => removePreview(i)} style={{ position: 'absolute', top: 3, right: 3, background: 'rgba(0,0,0,0.6)', color: 'white', border: 'none', borderRadius: '50%', width: 20, height: 20, fontSize: 11, cursor: 'pointer', lineHeight: '20px', textAlign: 'center' }}>x</button>
                     )}
                     {i === 0 && <span style={{ position: 'absolute', bottom: 3, left: 3, background: '#1a56a0', color: 'white', fontSize: 10, padding: '1px 6px', borderRadius: 4 }}>Cover</span>}
                   </div>
@@ -163,9 +179,12 @@ export default function AdminPage({ navigate }) {
               </div>
             )}
             <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 10, borderRadius: 8, border: '2px dashed #d1d5db', cursor: 'pointer', fontSize: 14, color: '#6b7280', background: '#f9fafb' }}>
-              {uploading ? 'Uploading...' : previews.length > 0 ? 'Add more photos' : 'Upload photos from device'}
+              {uploading ? 'Uploading...' : previews.length > 0 ? 'Add more / replace photos' : 'Upload photos from device'}
               <input type="file" accept="image/*" multiple onChange={handleImageChange} style={{ display: 'none' }} />
             </label>
+            {editingId && imageFiles.length === 0 && previews.length > 0 && (
+              <p style={{ fontSize: 12, color: '#6b7280', marginTop: 6, textAlign: 'center' }}>Existing photos will be kept if you don't upload new ones</p>
+            )}
           </div>
 
           {inp('Title', 'title', 'text', 'e.g. Spacious 3 Bed House — Kirwan')}
@@ -253,7 +272,7 @@ export default function AdminPage({ navigate }) {
           {error && <p style={{ color: '#dc2626', fontSize: 13, marginBottom: 10 }}>{error}</p>}
           {success && <p style={{ color: '#16a34a', fontSize: 13, marginBottom: 10 }}>{success}</p>}
 
-          <button onClick={submit} disabled={loading || uploading} style={{ width: '100%', padding: 11, background: editingId ? '#16a34a' : '#1a56a0', color: 'white', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>
+          <button onClick={submit} disabled={loading || uploading} style={{ width: '100%', padding: 11, background: editingId ? '#16a34a' : '#1a56a0', color: 'white', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: loading || uploading ? 'not-allowed' : 'pointer' }}>
             {loading || uploading ? 'Saving...' : editingId ? 'Save Changes' : 'Add Listing'}
           </button>
         </div>
