@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const SUBURBS = ['Kirwan', 'Townsville City', 'Thuringowa', 'Aitkenvale', 'Mundingburra', 'Hyde Park', 'Kelso', 'Idalia', 'Hermit Park', 'North Ward', 'South Townsville', 'Belgian Gardens', 'Bohle Plains', 'Castle Hill', 'Rosslea', 'Cranbrook', 'Heatley', 'Annandale', 'Wulguru', 'Rasmussen'];
-const empty = { title: '', type: 'house', price: '', bedrooms: '', bathrooms: '', address: '', suburb: 'Kirwan', postcode: '', description: '', availableDate: '', leaseLength: '12 months', petFriendly: false, airCon: false, pool: false, garage: false, furnished: false, billsIncluded: false, imageUrl: '', contactName: 'TSV Rentals', contactPhone: '' };
+const empty = { title: '', type: 'house', price: '', bedrooms: '', bathrooms: '', address: '', suburb: 'Kirwan', postcode: '', description: '', availableDate: '', leaseLength: '12 months', petFriendly: false, airCon: false, pool: false, garage: false, furnished: false, billsIncluded: false, contactName: 'TSV Rentals', contactPhone: '' };
 
 export default function AdminPage({ navigate }) {
   const [form, setForm] = useState(empty);
@@ -29,7 +29,6 @@ export default function AdminPage({ navigate }) {
     if (!files.length) return;
     setImageFiles(files);
     setPreviews(files.map(f => URL.createObjectURL(f)));
-    setForm(f => ({ ...f, imageUrl: '' }));
   }
 
   function removePreview(i) {
@@ -38,14 +37,13 @@ export default function AdminPage({ navigate }) {
   }
 
   async function uploadImages(listingId) {
-    if (!imageFiles.length) return;
     setUploading(true);
     try {
       const fd = new FormData();
       imageFiles.forEach(f => fd.append('images', f));
       const res = await fetch('/api/upload', { method: 'POST', body: fd });
       const data = await res.json();
-      if (data.urls) {
+      if (data.urls && data.urls.length > 0) {
         await fetch('/api/admin/listing/' + listingId + '/images?key=tsvadmin2026', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -81,7 +79,6 @@ export default function AdminPage({ navigate }) {
       garage: listing.garage === 1,
       furnished: listing.furnished === 1,
       billsIncluded: listing.bills_included === 1,
-      imageUrl: listing.cover_image || '',
       contactName: listing.landlord_name || 'TSV Rentals',
       contactPhone: listing.landlord_phone || '',
     });
@@ -106,10 +103,11 @@ export default function AdminPage({ navigate }) {
         ? '/api/admin/listing/' + editingId + '?key=tsvadmin2026'
         : '/api/admin/listing?key=tsvadmin2026';
       const method = editingId ? 'PUT' : 'POST';
+      const payload = { ...form };
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Something went wrong'); return; }
@@ -183,7 +181,7 @@ export default function AdminPage({ navigate }) {
               <input type="file" accept="image/*" multiple onChange={handleImageChange} style={{ display: 'none' }} />
             </label>
             {editingId && imageFiles.length === 0 && previews.length > 0 && (
-              <p style={{ fontSize: 12, color: '#6b7280', marginTop: 6, textAlign: 'center' }}>Existing photos will be kept if you don't upload new ones</p>
+              <p style={{ fontSize: 12, color: '#6b7280', marginTop: 6, textAlign: 'center' }}>Existing photos kept — upload new ones to replace</p>
             )}
           </div>
 
