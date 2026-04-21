@@ -7,7 +7,6 @@ export default function AdminPage({ navigate }) {
   const [form, setForm] = useState(empty);
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [editingId, setEditingId] = useState(null);
@@ -27,34 +26,15 @@ export default function AdminPage({ navigate }) {
   function handleImageChange(e) {
     const files = Array.from(e.target.files);
     if (!files.length) return;
-    setImageFiles(files);
-    setPreviews(files.map(f => URL.createObjectURL(f)));
+    const newFiles = [...imageFiles, ...files];
+    setImageFiles(newFiles);
+    setPreviews(newFiles.map(f => URL.createObjectURL(f)));
   }
 
   function removePreview(i) {
-    setImageFiles(prev => prev.filter((_, idx) => idx !== i));
-    setPreviews(prev => prev.filter((_, idx) => idx !== i));
-  }
-
-  async function uploadImages(listingId) {
-    setUploading(true);
-    try {
-      const fd = new FormData();
-      imageFiles.forEach(f => fd.append('images', f));
-      const res = await fetch('/api/upload', { method: 'POST', body: fd });
-      const data = await res.json();
-      if (data.urls && data.urls.length > 0) {
-        await fetch('/api/admin/listing/' + listingId + '/images?key=tsvadmin2026', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ urls: data.urls })
-        });
-      }
-    } catch {
-      setError('Image upload failed');
-    } finally {
-      setUploading(false);
-    }
+    const newFiles = imageFiles.filter((_, idx) => idx !== i);
+    setImageFiles(newFiles);
+    setPreviews(newFiles.map(f => URL.createObjectURL(f)));
   }
 
   function startEdit(listing) {
@@ -103,24 +83,39 @@ export default function AdminPage({ navigate }) {
         ? '/api/admin/listing/' + editingId + '?key=tsvadmin2026'
         : '/api/admin/listing?key=tsvadmin2026';
       const method = editingId ? 'PUT' : 'POST';
-      const payload = { ...form };
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(form)
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Something went wrong'); return; }
+
       const listingId = editingId || data.id;
-      if (imageFiles.length > 0) await uploadImages(listingId);
+
+      if (imageFiles.length > 0) {
+        const fd = new FormData();
+        imageFiles.forEach(f => fd.append('images', f));
+        const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd });
+        const uploadData = await uploadRes.json();
+        if (uploadData.urls && uploadData.urls.length > 0) {
+          await fetch('/api/admin/listing/' + listingId + '/images?key=tsvadmin2026', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ urls: uploadData.urls })
+          });
+        }
+      }
+
       setSuccess(editingId ? 'Listing updated!' : 'Listing added!');
       setForm(empty);
       setEditingId(null);
       setImageFiles([]);
       setPreviews([]);
       fetchListings();
-    } catch {
-      setError('Could not save listing');
+    } catch (err) {
+      setError('Could not save listing: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -162,7 +157,7 @@ export default function AdminPage({ navigate }) {
           </div>
 
           <div style={{ marginBottom: 20 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 8, color: '#374151' }}>Photos (up to 10)</label>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 8, color: '#374151' }}>Photos (select multiple or add one at a time)</label>
             {previews.length > 0 && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 10 }}>
                 {previews.map((p, i) => (
@@ -177,7 +172,7 @@ export default function AdminPage({ navigate }) {
               </div>
             )}
             <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 10, borderRadius: 8, border: '2px dashed #d1d5db', cursor: 'pointer', fontSize: 14, color: '#6b7280', background: '#f9fafb' }}>
-              {uploading ? 'Uploading...' : previews.length > 0 ? 'Add more / replace photos' : 'Upload photos from device'}
+              {previews.length > 0 ? 'Add more photos (' + imageFiles.length + ' selected)' : 'Upload photos from device'}
               <input type="file" accept="image/*" multiple onChange={handleImageChange} style={{ display: 'none' }} />
             </label>
             {editingId && imageFiles.length === 0 && previews.length > 0 && (
@@ -270,8 +265,8 @@ export default function AdminPage({ navigate }) {
           {error && <p style={{ color: '#dc2626', fontSize: 13, marginBottom: 10 }}>{error}</p>}
           {success && <p style={{ color: '#16a34a', fontSize: 13, marginBottom: 10 }}>{success}</p>}
 
-          <button onClick={submit} disabled={loading || uploading} style={{ width: '100%', padding: 11, background: editingId ? '#16a34a' : '#1a56a0', color: 'white', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: loading || uploading ? 'not-allowed' : 'pointer' }}>
-            {loading || uploading ? 'Saving...' : editingId ? 'Save Changes' : 'Add Listing'}
+          <button onClick={submit} disabled={loading} style={{ width: '100%', padding: 11, background: editingId ? '#16a34a' : '#1a56a0', color: 'white', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer' }}>
+            {loading ? 'Saving...' : editingId ? 'Save Changes' : 'Add Listing'}
           </button>
         </div>
 
