@@ -88,6 +88,16 @@ app.post('/api/upload', upload.array('images', 10), (req, res) => {
   res.json({ urls });
 });
 
+app.post('/api/listings/:id/image', requireAuth, (req, res) => {
+  try {
+    const { url } = req.body;
+    Images.insert.run(randomUUID(), req.params.id, url, 0);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/listings/:id/images', requireAuth, (req, res) => {
   try {
     const { urls } = req.body;
@@ -114,7 +124,7 @@ app.post('/api/admin/listing/:id/images', (req, res) => {
 app.post('/api/admin/listing', async (req, res) => {
   if (req.query.key !== 'tsvadmin2026') return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const { title, type, price, bedrooms, bathrooms, address, suburb, postcode, lat, lng, description, availableDate, leaseLength, petFriendly, airCon, pool, garage, furnished, billsIncluded, imageUrl, contactName, contactPhone } = req.body;
+    const { title, type, price, bedrooms, bathrooms, address, suburb, postcode, lat, lng, description, availableDate, leaseLength, petFriendly, airCon, pool, garage, furnished, billsIncluded, contactName, contactPhone } = req.body;
     if (!title || !type || !price || !bedrooms || !bathrooms || !address || !suburb || !postcode) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -131,7 +141,6 @@ app.post('/api/admin/listing', async (req, res) => {
     }
     const id = randomUUID();
     Listings.insert.run(id, adminUser.id, title, type, parseInt(price), parseInt(bedrooms), parseInt(bathrooms), address, suburb, postcode, lat ? parseFloat(lat) : null, lng ? parseFloat(lng) : null, description || null, availableDate || null, leaseLength || null, petFriendly ? 1 : 0, airCon ? 1 : 0, pool ? 1 : 0, garage ? 1 : 0, furnished ? 1 : 0, billsIncluded ? 1 : 0, null);
-    if (imageUrl) Images.insert.run(randomUUID(), id, imageUrl, 0);
     res.status(201).json({ success: true, id });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -141,16 +150,16 @@ app.post('/api/admin/listing', async (req, res) => {
 app.put('/api/admin/listing/:id', async (req, res) => {
   if (req.query.key !== 'tsvadmin2026') return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const { title, type, price, bedrooms, bathrooms, address, suburb, postcode, lat, lng, description, availableDate, leaseLength, petFriendly, airCon, pool, garage, furnished, billsIncluded, imageUrl, contactName, contactPhone } = req.body;
-    db.prepare(`UPDATE listings SET title=?, type=?, price=?, bedrooms=?, bathrooms=?, address=?, suburb=?, postcode=?, lat=?, lng=?, description=?, available_date=?, lease_length=?, pet_friendly=?, air_con=?, pool=?, garage=?, furnished=?, bills_included=? WHERE id=?`).run(title, type, parseInt(price), parseInt(bedrooms), parseInt(bathrooms), address, suburb, postcode, lat ? parseFloat(lat) : null, lng ? parseFloat(lng) : null, description || null, availableDate || null, leaseLength || null, petFriendly ? 1 : 0, airCon ? 1 : 0, pool ? 1 : 0, garage ? 1 : 0, furnished ? 1 : 0, billsIncluded ? 1 : 0, req.params.id);
-    if (imageUrl) {
-      const existing = db.prepare(`SELECT id FROM listing_images WHERE listing_id = ? ORDER BY position LIMIT 1`).get(req.params.id);
-      if (existing) {
-        db.prepare(`UPDATE listing_images SET url = ? WHERE id = ?`).run(imageUrl, existing.id);
-      } else {
-        Images.insert.run(randomUUID(), req.params.id, imageUrl, 0);
-      }
-    }
+    const { title, type, price, bedrooms, bathrooms, address, suburb, postcode, lat, lng, description, availableDate, leaseLength, petFriendly, airCon, pool, garage, furnished, billsIncluded, contactName, contactPhone } = req.body;
+    db.prepare(`UPDATE listings SET title=?, type=?, price=?, bedrooms=?, bathrooms=?, address=?, suburb=?, postcode=?, lat=?, lng=?, description=?, available_date=?, lease_length=?, pet_friendly=?, air_con=?, pool=?, garage=?, furnished=?, bills_included=? WHERE id=?`).run(
+      title, type, parseInt(price), parseInt(bedrooms), parseInt(bathrooms),
+      address, suburb, postcode,
+      lat ? parseFloat(lat) : null, lng ? parseFloat(lng) : null,
+      description || null, availableDate || null, leaseLength || null,
+      petFriendly ? 1 : 0, airCon ? 1 : 0, pool ? 1 : 0,
+      garage ? 1 : 0, furnished ? 1 : 0, billsIncluded ? 1 : 0,
+      req.params.id
+    );
     if (contactName) {
       db.prepare(`UPDATE users SET name = ?, phone = ? WHERE email = ?`).run(contactName, contactPhone || '', 'admin@tsvrentals.internal');
     }
@@ -212,26 +221,6 @@ app.post('/api/listings', requireAuth, (req, res) => {
     const id = randomUUID();
     Listings.insert.run(id, req.user.id, title, type, price, bedrooms, bathrooms, address, suburb, postcode, lat || null, lng || null, description || null, availableDate || null, leaseLength || null, petFriendly ? 1 : 0, airCon ? 1 : 0, pool ? 1 : 0, garage ? 1 : 0, furnished ? 1 : 0, billsIncluded ? 1 : 0, virtualTour || null);
     res.status(201).json({ id, success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post('/api/listings/:id/image', requireAuth, (req, res) => {
-  try {
-    const { url } = req.body;
-    Images.insert.run(randomUUID(), req.params.id, url, 0);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post('/api/listings/:id/images', requireAuth, (req, res) => {
-  try {
-    const { urls } = req.body;
-    urls.forEach((url, i) => Images.insert.run(randomUUID(), req.params.id, url, i));
-    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
