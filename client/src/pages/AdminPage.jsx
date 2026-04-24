@@ -2,18 +2,24 @@ import React, { useState, useEffect } from 'react';
 
 const SUBURBS = [
   'Aitkenvale', 'Annandale', 'Belgian Gardens', 'Bohle', 'Bohle Plains',
-  'Burdell', 'Cape Cleveland', 'Car radotta', 'Castle Hill', 'Cluden',
-  'Condon', 'Cranbrook', 'Currajong', 'Douglas', 'Deeragun', 'Garbutt',
-  'Gulliver', 'ハーミット Park', 'Heatley', 'Heritage Park', 'Hyde Park',
-  'Idalia', 'Kelso', 'Kirwan', 'Lammermoor', 'Magnetic Island',
-  'Mount Louisa', 'Mount St John', 'Mount Stuart', 'Mundingburra',
-  'Mysterton', 'Nelly Bay', 'North Ward', 'Oonoonba', 'Pallarenda',
-  'Pimlico', 'Rasmussen', 'Rosslea', 'Rowes Bay', 'Shaw',
-  'Shepparton', 'Sikeside', 'South Townsville', 'Stuart', 'Suburb',
-  'Thuringowa', 'Tollgate', 'Townsville City', 'Vincent', 'Wulguru',
-  'Wurrumiyanga', 'Yorkeys Knob'
-].sort();
-const empty = { title: '', type: 'house', price: '', bedrooms: '', bathrooms: '', address: '', suburb: 'Kirwan', postcode: '', description: '', availableDate: '', leaseLength: '12 months', petFriendly: false, airCon: false, pool: false, garage: false, furnished: false, billsIncluded: false, contactName: 'TSV Rentals', contactPhone: '' };
+  'Burdell', 'Castle Hill', 'Cluden', 'Condon', 'Cranbrook', 'Currajong',
+  'Deeragun', 'Douglas', 'Garbutt', 'Gulliver', 'Heatley', 'Heritage Park',
+  'Hermit Park', 'Hyde Park', 'Idalia', 'Kelso', 'Kirwan', 'Mount Louisa',
+  'Mount St John', 'Mount Stuart', 'Mundingburra', 'Mysterton', 'North Ward',
+  'Oonoonba', 'Pallarenda', 'Pimlico', 'Rasmussen', 'Rosslea', 'Rowes Bay',
+  'Shaw', 'South Townsville', 'Stuart', 'Thuringowa', 'Townsville City',
+  'Vincent', 'Wulguru'
+];
+
+const empty = {
+  title: '', type: 'house', price: '', bedrooms: '', bathrooms: '',
+  address: '', suburb: 'Kirwan', postcode: '', description: '',
+  availableDate: '', leaseLength: '12 months',
+  petFriendly: false, airCon: false, pool: false, garage: false,
+  furnished: false, billsIncluded: false,
+  contactName: 'TSV Rentals', contactPhone: '',
+  agentLogo: ''
+};
 
 export default function AdminPage({ navigate }) {
   const [form, setForm] = useState(empty);
@@ -73,6 +79,7 @@ export default function AdminPage({ navigate }) {
       billsIncluded: listing.bills_included === 1,
       contactName: listing.landlord_name || 'TSV Rentals',
       contactPhone: listing.landlord_phone || '',
+      agentLogo: listing.agent_logo || ''
     });
     window.scrollTo(0, 0);
   }
@@ -143,7 +150,8 @@ export default function AdminPage({ navigate }) {
   const inp = (label, key, type = 'text', placeholder = '') => (
     <div style={{ marginBottom: 14 }}>
       <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4, color: '#374151' }}>{label}</label>
-      <input type={type} value={form[key]} onChange={e => update(key, e.target.value)} placeholder={placeholder} style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }} />
+      <input type={type} value={form[key]} onChange={e => update(key, e.target.value)} placeholder={placeholder}
+        style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }} />
     </div>
   );
 
@@ -168,8 +176,9 @@ export default function AdminPage({ navigate }) {
             {editingId && <button onClick={cancelEdit} style={{ background: '#f3f4f6', border: 'none', borderRadius: 6, padding: '5px 12px', fontSize: 12, cursor: 'pointer' }}>Cancel</button>}
           </div>
 
+          {/* Photos */}
           <div style={{ marginBottom: 20 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 8, color: '#374151' }}>Photos (select multiple or add one at a time)</label>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 8, color: '#374151' }}>Photos</label>
             {previews.length > 0 && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 10 }}>
                 {previews.map((p, i) => (
@@ -196,28 +205,32 @@ export default function AdminPage({ navigate }) {
 
           <div style={{ marginBottom: 14 }}>
             <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4, color: '#374151' }}>Type</label>
-            <select value={form.type} onChange={e => update('type', e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14 }}>
+            <select value={form.type} onChange={e => update('type', e.target.value)}
+              style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14 }}>
               <option value="house">House</option>
               <option value="unit">Unit</option>
+              <option value="apartment">Apartment</option>
               <option value="townhouse">Townhouse</option>
               <option value="studio">Studio</option>
               <option value="room">Room</option>
-              <option value="apartment">Apartment</option>
             </select>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 14 }}>
             <div>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Price/week</label>
-              <input type="number" value={form.price} onChange={e => update('price', e.target.value)} placeholder="450" style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }} />
+              <input type="number" value={form.price} onChange={e => update('price', e.target.value)} placeholder="450"
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Bedrooms</label>
-              <input type="number" value={form.bedrooms} onChange={e => update('bedrooms', e.target.value)} placeholder="3" style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }} />
+              <input type="number" value={form.bedrooms} onChange={e => update('bedrooms', e.target.value)} placeholder="3"
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Bathrooms</label>
-              <input type="number" value={form.bathrooms} onChange={e => update('bathrooms', e.target.value)} placeholder="1" style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }} />
+              <input type="number" value={form.bathrooms} onChange={e => update('bathrooms', e.target.value)} placeholder="1"
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }} />
             </div>
           </div>
 
@@ -226,29 +239,35 @@ export default function AdminPage({ navigate }) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
             <div>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Suburb</label>
-              <select value={form.suburb} onChange={e => update('suburb', e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14 }}>
+              <select value={form.suburb} onChange={e => update('suburb', e.target.value)}
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14 }}>
                 {SUBURBS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Postcode</label>
-              <input type="text" value={form.postcode} onChange={e => update('postcode', e.target.value)} placeholder="4817" style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }} />
+              <input type="text" value={form.postcode} onChange={e => update('postcode', e.target.value)} placeholder="4817"
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }} />
             </div>
           </div>
 
           <div style={{ marginBottom: 14 }}>
             <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Description</label>
-            <textarea value={form.description} onChange={e => update('description', e.target.value)} rows={4} placeholder="Describe the property..." style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14, resize: 'vertical', boxSizing: 'border-box' }} />
+            <textarea value={form.description} onChange={e => update('description', e.target.value)} rows={4}
+              placeholder="Describe the property..."
+              style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14, resize: 'vertical', boxSizing: 'border-box' }} />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
             <div>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Available date</label>
-              <input type="date" value={form.availableDate} onChange={e => update('availableDate', e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }} />
+              <input type="date" value={form.availableDate} onChange={e => update('availableDate', e.target.value)}
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Lease length</label>
-              <select value={form.leaseLength} onChange={e => update('leaseLength', e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14 }}>
+              <select value={form.leaseLength} onChange={e => update('leaseLength', e.target.value)}
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14 }}>
                 <option value="3 months">3 months</option>
                 <option value="6 months">6 months</option>
                 <option value="12 months">12 months</option>
@@ -269,16 +288,30 @@ export default function AdminPage({ navigate }) {
             </div>
           </div>
 
-          <div style={{ background: '#f0f7ff', borderRadius: 8, padding: 16, marginBottom: 20 }}>
+          <div style={{ background: '#f0f7ff', borderRadius: 8, padding: 16, marginBottom: 14 }}>
             <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>Contact (shown on listing)</p>
             {inp('Contact name', 'contactName', 'text', 'TSV Rentals')}
             {inp('Contact phone', 'contactPhone', 'text', '07 4700 0000')}
           </div>
 
+          {/* Agent Logo */}
+          <div style={{ background: '#fff7ed', borderRadius: 8, padding: 16, marginBottom: 20 }}>
+            <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Agency Logo (optional)</p>
+            <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 10 }}>Upload logo to imgbb.com and paste the URL here</p>
+            {inp('Logo URL', 'agentLogo', 'text', 'https://i.ibb.co/...')}
+            {form.agentLogo && (
+              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
+                <img src={form.agentLogo} alt="logo preview" style={{ height: 40, objectFit: 'contain', borderRadius: 4, background: 'white', padding: 4, border: '1px solid #e5e7eb' }} />
+                <span style={{ fontSize: 12, color: '#16a34a' }}>✅ Logo preview</span>
+              </div>
+            )}
+          </div>
+
           {error && <p style={{ color: '#dc2626', fontSize: 13, marginBottom: 10 }}>{error}</p>}
           {success && <p style={{ color: '#16a34a', fontSize: 13, marginBottom: 10 }}>{success}</p>}
 
-          <button onClick={submit} disabled={loading} style={{ width: '100%', padding: 11, background: editingId ? '#16a34a' : '#1a56a0', color: 'white', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer' }}>
+          <button onClick={submit} disabled={loading}
+            style={{ width: '100%', padding: 11, background: editingId ? '#16a34a' : '#1a56a0', color: 'white', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer' }}>
             {loading ? 'Saving...' : editingId ? 'Save Changes' : 'Add Listing'}
           </button>
         </div>
@@ -289,9 +322,12 @@ export default function AdminPage({ navigate }) {
             <div key={l.id} style={{ background: 'white', border: editingId === l.id ? '2px solid #1a56a0' : '1px solid #e5e7eb', borderRadius: 8, marginBottom: 10, overflow: 'hidden' }}>
               {l.cover_image && <img src={l.cover_image} alt={l.title} style={{ width: '100%', height: 100, objectFit: 'cover' }} />}
               <div style={{ padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 500 }}>{l.title}</div>
-                  <div style={{ fontSize: 12, color: '#6b7280' }}>{l.suburb} — ${l.price}/wk — {l.bedrooms} bed</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  {l.agent_logo && <img src={l.agent_logo} alt="agent" style={{ height: 28, objectFit: 'contain', borderRadius: 4 }} />}
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 500 }}>{l.title}</div>
+                    <div style={{ fontSize: 12, color: '#6b7280' }}>{l.suburb} — ${l.price}/wk — {l.bedrooms} bed</div>
+                  </div>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button onClick={() => startEdit(l)} style={{ background: '#e0f0ff', color: '#1a56a0', border: 'none', borderRadius: 6, padding: '5px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 500 }}>Edit</button>
