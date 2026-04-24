@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
 
-const SUBURBS = ['Kirwan', 'Townsville City', 'Thuringowa', 'Aitkenvale', 'Mundingburra', 'Hyde Park', 'Kelso', 'Idalia', 'Hermit Park', 'North Ward', 'South Townsville', 'Belgian Gardens'];
-
-export default function HomePage({ navigate, user }) {
+const SUBURBS = [
+  'Aitkenvale', 'Annandale', 'Belgian Gardens', 'Bohle', 'Bohle Plains',
+  'Burdell', 'Cape Cleveland', 'Car radotta', 'Castle Hill', 'Cluden',
+  'Condon', 'Cranbrook', 'Currajong', 'Douglas', 'Deeragun', 'Garbutt',
+  'Gulliver', 'ハーミット Park', 'Heatley', 'Heritage Park', 'Hyde Park',
+  'Idalia', 'Kelso', 'Kirwan', 'Lammermoor', 'Magnetic Island',
+  'Mount Louisa', 'Mount St John', 'Mount Stuart', 'Mundingburra',
+  'Mysterton', 'Nelly Bay', 'North Ward', 'Oonoonba', 'Pallarenda',
+  'Pimlico', 'Rasmussen', 'Rosslea', 'Rowes Bay', 'Shaw',
+  'Shepparton', 'Sikeside', 'South Townsville', 'Stuart', 'Suburb',
+  'Thuringowa', 'Tollgate', 'Townsville City', 'Vincent', 'Wulguru',
+  'Wurrumiyanga', 'Yorkeys Knob'
+].sort();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
