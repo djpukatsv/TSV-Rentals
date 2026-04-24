@@ -125,7 +125,7 @@ app.post('/api/admin/listing', async (req, res) => {
   if (req.query.key !== 'tsvadmin2026') return res.status(401).json({ error: 'Unauthorized' });
   try {
     const { title, type, price, bedrooms, bathrooms, address, suburb, postcode, lat, lng, description, availableDate, leaseLength, petFriendly, airCon, pool, garage, furnished, billsIncluded, contactName, contactPhone } = req.body;
-    if (!title || !type || !price || !bedrooms || !bathrooms || !address || !suburb || !postcode) {
+   if (!title) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     const bcrypt = await import('bcryptjs');
