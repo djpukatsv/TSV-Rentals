@@ -36,12 +36,11 @@ try {
   const existing = db.prepare(`SELECT COUNT(*) as count FROM users WHERE email = ?`).get('landlord@tsvrentals.com.au');
   if (existing.count === 0) {
     const landlordId = randomUUID();
-    const bcrypt = await import('bcryptjs');
-    const hashed = bcrypt.default.hashSync('tsvlandlord2026', 10);
+    const bcrypt = (await import('bcryptjs')).default;
+    const hashed = bcrypt.hashSync('tsvlandlord2026', 10);
     db.prepare(`INSERT INTO users (id, email, password, name, phone, role) VALUES (?, ?, ?, ?, ?, ?)`).run(landlordId, 'landlord@tsvrentals.com.au', hashed, 'TSV Property Management', '0747001234', 'user');
   }
-} catch {}
-
+} catch (e) { console.log('Seed skipped:', e.message); }
 // ── Image upload ──────────────────────────────────────────────────────────────
 app.post('/api/upload', upload.array('images', 10), (req, res) => {
   if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'No files uploaded' });
