@@ -2,17 +2,14 @@ import React, { useState, useEffect } from 'react';
 
 const SUBURBS = [
   'Aitkenvale', 'Annandale', 'Belgian Gardens', 'Bohle', 'Bohle Plains',
-  'Burdell', 'Cape Cleveland', 'Car radotta', 'Castle Hill', 'Cluden',
-  'Condon', 'Cranbrook', 'Currajong', 'Douglas', 'Deeragun', 'Garbutt',
-  'Gulliver', 'ハーミット Park', 'Heatley', 'Heritage Park', 'Hyde Park',
-  'Idalia', 'Kelso', 'Kirwan', 'Lammermoor', 'Magnetic Island',
-  'Mount Louisa', 'Mount St John', 'Mount Stuart', 'Mundingburra',
-  'Mysterton', 'Nelly Bay', 'North Ward', 'Oonoonba', 'Pallarenda',
-  'Pimlico', 'Rasmussen', 'Rosslea', 'Rowes Bay', 'Shaw',
-  'Shepparton', 'Sikeside', 'South Townsville', 'Stuart', 'Suburb',
-  'Thuringowa', 'Tollgate', 'Townsville City', 'Vincent', 'Wulguru',
-  'Wurrumiyanga', 'Yorkeys Knob'
-].sort();
+  'Burdell', 'Castle Hill', 'Cluden', 'Condon', 'Cranbrook', 'Currajong',
+  'Deeragun', 'Douglas', 'Garbutt', 'Gulliver', 'Heatley', 'Heritage Park',
+  'Hermit Park', 'Hyde Park', 'Idalia', 'Kelso', 'Kirwan', 'Mount Louisa',
+  'Mount St John', 'Mount Stuart', 'Mundingburra', 'Mysterton', 'North Ward',
+  'Oonoonba', 'Pallarenda', 'Pimlico', 'Rasmussen', 'Rosslea', 'Rowes Bay',
+  'Shaw', 'South Townsville', 'Stuart', 'Thuringowa', 'Townsville City',
+  'Vincent', 'Wulguru'
+];
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
