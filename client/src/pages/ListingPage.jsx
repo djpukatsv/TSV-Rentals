@@ -62,6 +62,14 @@ export default function ListingPage({ listing, navigate, user }) {
               {listing.promoted === 1 && <span className="badge badge-amber" style={{ marginBottom: 8, display: 'inline-block' }}>Featured</span>}
               <h1 style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>{listing.title}</h1>
               <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 8 }}>{fullAddress}</p>
+
+              {/* Agent Logo */}
+              {listing.agent_logo && (
+                <div style={{ marginBottom: 10 }}>
+                  <img src={listing.agent_logo} alt="agent" style={{ height: 36, objectFit: 'contain', background: 'white', padding: '4px 8px', borderRadius: 6, border: '1px solid #e5e7eb' }} />
+                </div>
+              )}
+
               <div style={{ fontSize: 26, fontWeight: 700, color: '#1a56a0' }}>
                 ${listing.price} <span style={{ fontSize: 15, fontWeight: 400, color: '#6b7280' }}>/ week</span>
               </div>
@@ -126,6 +134,11 @@ export default function ListingPage({ listing, navigate, user }) {
 
           <div style={{ position: 'sticky', top: 80 }}>
             <div className="card" style={{ padding: 24 }}>
+              {listing.agent_logo && (
+                <div style={{ textAlign: 'center', marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid #e5e7eb' }}>
+                  <img src={listing.agent_logo} alt="agent" style={{ height: 40, objectFit: 'contain' }} />
+                </div>
+              )}
               <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>Enquire about this property</h3>
               <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 20 }}>Listed by {listing.landlord_name}</p>
               {sent ? (
