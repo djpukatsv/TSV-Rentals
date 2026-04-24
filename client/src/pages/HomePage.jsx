@@ -75,6 +75,7 @@ export default function HomePage({ navigate, user }) {
               <option value="house">House</option>
               <option value="unit">Unit</option>
               <option value="room">Room</option>
+              <option value="apartment">Apartment</option>
               <option value="townhouse">Townhouse</option>
             </select>
             <select value={filters.suburb} onChange={e => handleFilter('suburb', e.target.value)}
