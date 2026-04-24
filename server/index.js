@@ -215,7 +215,7 @@ app.get('/api/listings/:id', (req, res) => {
 app.post('/api/listings', requireAuth, (req, res) => {
   try {
     const { title, type, price, bedrooms, bathrooms, address, suburb, postcode, lat, lng, description, availableDate, leaseLength, petFriendly, airCon, pool, garage, furnished, billsIncluded, virtualTour } = req.body;
-    if (!title || !type || !price || !bedrooms || !bathrooms || !address || !suburb || !postcode) {
+   if (!title || !type || !price || !address || !suburb || !postcode) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     const id = randomUUID();
