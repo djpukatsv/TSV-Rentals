@@ -47,6 +47,7 @@ db.exec(`
     furnished       INTEGER DEFAULT 0,
     bills_included  INTEGER DEFAULT 0,
     virtual_tour    TEXT,
+    agent_logo      TEXT,
     promoted        INTEGER DEFAULT 0,
     promoted_until  TEXT,
     active          INTEGER DEFAULT 1,
@@ -101,8 +102,8 @@ export const Users = {
 
 export const Listings = {
   insert: db.prepare(`
-    INSERT INTO listings (id, user_id, title, type, price, bedrooms, bathrooms, address, suburb, postcode, lat, lng, description, available_date, lease_length, pet_friendly, air_con, pool, garage, furnished, bills_included, virtual_tour)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO listings (id, user_id, title, type, price, bedrooms, bathrooms, address, suburb, postcode, lat, lng, description, available_date, lease_length, pet_friendly, air_con, pool, garage, furnished, bills_included, virtual_tour, agent_logo)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `),
   findAll: db.prepare(`
     SELECT l.*, u.name as landlord_name, u.phone as landlord_phone,
