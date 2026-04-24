@@ -202,6 +202,7 @@ export default function AdminPage({ navigate }) {
               <option value="townhouse">Townhouse</option>
               <option value="studio">Studio</option>
               <option value="room">Room</option>
+              <option value="apartment">Apartment</option>
             </select>
           </div>
 
