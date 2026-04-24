@@ -94,6 +94,9 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_listings_active ON listings(active);
 `);
 
+// Safely add new columns to existing databases
+try { db.exec(`ALTER TABLE listings ADD COLUMN agent_logo TEXT`); } catch {}
+
 export const Users = {
   create: db.prepare(`INSERT INTO users (id, email, password, name, phone, role) VALUES (?, ?, ?, ?, ?, ?)`),
   findByEmail: db.prepare(`SELECT * FROM users WHERE email = ?`),
