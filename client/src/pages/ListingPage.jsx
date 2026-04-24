@@ -191,12 +191,12 @@ function Gallery({ listingId, coverImage }) {
   }, [listingId]);
 
   if (images.length === 0) {
-    return <div style={{ height: 450, background: 'linear-gradient(135deg, #b5d4f4, #e6f1fb)', borderRadius: 10, marginBottom: 20 }} />;
+    return <div style={{ height: 550, background: 'linear-gradient(135deg, #b5d4f4, #e6f1fb)', borderRadius: 10, marginBottom: 20 }} />;
   }
 
   return (
     <div style={{ marginBottom: 20 }}>
-      <div style={{ position: 'relative', height: 450, borderRadius: 10, overflow: 'hidden' }}>
+      <div style={{ position: 'relative', height: 550, borderRadius: 10, overflow: 'hidden' }}>
         <img src={images[current]} alt="property" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         {images.length > 1 && (
           <div>
