@@ -63,7 +63,6 @@ export default function ListingPage({ listing, navigate, user }) {
               <h1 style={{ fontSize: 22, fontWeight: 600, marginBottom: 4 }}>{listing.title}</h1>
               <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 8 }}>{fullAddress}</p>
 
-              {/* Agent Logo */}
               {listing.agent_logo && (
                 <div style={{ marginBottom: 10 }}>
                   <img src={listing.agent_logo} alt="agent" style={{ height: 60, objectFit: 'contain', background: 'white', padding: '4px 8px', borderRadius: 6, border: '1px solid #e5e7eb' }} />
@@ -136,7 +135,7 @@ export default function ListingPage({ listing, navigate, user }) {
             <div className="card" style={{ padding: 24 }}>
               {listing.agent_logo && (
                 <div style={{ textAlign: 'center', marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid #e5e7eb' }}>
-                  <img src={listing.agent_logo} alt="agent" style={{ height: 40, objectFit: 'contain' }} />
+                  <img src={listing.agent_logo} alt="agent" style={{ height: 50, objectFit: 'contain' }} />
                 </div>
               )}
               <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>Enquire about this property</h3>
@@ -192,12 +191,12 @@ function Gallery({ listingId, coverImage }) {
   }, [listingId]);
 
   if (images.length === 0) {
-    return <div style={{ height: 300, background: 'linear-gradient(135deg, #b5d4f4, #e6f1fb)', borderRadius: 10, marginBottom: 20 }} />;
+    return <div style={{ height: 450, background: 'linear-gradient(135deg, #b5d4f4, #e6f1fb)', borderRadius: 10, marginBottom: 20 }} />;
   }
 
   return (
     <div style={{ marginBottom: 20 }}>
-      <div style={{ position: 'relative', height: 300, borderRadius: 10, overflow: 'hidden' }}>
+      <div style={{ position: 'relative', height: 450, borderRadius: 10, overflow: 'hidden' }}>
         <img src={images[current]} alt="property" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         {images.length > 1 && (
           <div>
