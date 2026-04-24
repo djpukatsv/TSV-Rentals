@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { randomUUID } from 'crypto';
 import { Resend } from 'resend';
 import multer from 'multer';
+import bcryptjs from 'bcryptjs';
 import { db, Listings, Images, Enquiries, Saved, Analytics } from './db.js';
 import { registerRoutes as authRoutes, requireAuth, optionalAuth } from './auth.js';
 
@@ -36,11 +37,13 @@ try {
   const existing = db.prepare(`SELECT COUNT(*) as count FROM users WHERE email = ?`).get('landlord@tsvrentals.com.au');
   if (existing.count === 0) {
     const landlordId = randomUUID();
-    const bcrypt = (await import('bcryptjs')).default;
-    const hashed = bcrypt.hashSync('tsvlandlord2026', 10);
-    db.prepare(`INSERT INTO users (id, email, password, name, phone, role) VALUES (?, ?, ?, ?, ?, ?)`).run(landlordId, 'landlord@tsvrentals.com.au', hashed, 'TSV Property Management', '0747001234', 'user');
+    const hashed = bcryptjs.hashSync('tsvlandlord2026', 10);
+    db.prepare(`INSERT INTO users (id, email, password, name, phone, role) VALUES (?, ?, ?, ?, ?, ?)`).run(
+      landlordId, 'landlord@tsvrentals.com.au', hashed, 'TSV Property Management', '0747001234', 'user'
+    );
   }
 } catch (e) { console.log('Seed skipped:', e.message); }
+
 // ── Image upload ──────────────────────────────────────────────────────────────
 app.post('/api/upload', upload.array('images', 10), (req, res) => {
   if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'No files uploaded' });
@@ -66,7 +69,7 @@ app.post('/api/admin/listing/:id/images', (req, res) => {
 });
 
 // ── Admin listing endpoints ───────────────────────────────────────────────────
-app.post('/api/admin/listing', async (req, res) => {
+app.post('/api/admin/listing', (req, res) => {
   if (req.query.key !== 'tsvadmin2026') return res.status(401).json({ error: 'Unauthorized' });
   try {
     const {
@@ -76,17 +79,20 @@ app.post('/api/admin/listing', async (req, res) => {
       contactName, contactPhone, agentLogo
     } = req.body;
     if (!title) return res.status(400).json({ error: 'Title is required' });
-    const bcrypt = await import('bcryptjs');
+
     const adminEmail = 'admin@tsvrentals.internal';
     let adminUser = db.prepare(`SELECT id FROM users WHERE email = ?`).get(adminEmail);
     if (!adminUser) {
       const adminId = randomUUID();
-      const hashedPassword = bcrypt.default.hashSync(randomUUID(), 10);
-      db.prepare(`INSERT INTO users (id, email, password, name, phone, role) VALUES (?, ?, ?, ?, ?, ?)`).run(adminId, adminEmail, hashedPassword, contactName || 'TSV Rentals', contactPhone || '', 'user');
+      const hashedPassword = bcryptjs.hashSync(randomUUID(), 10);
+      db.prepare(`INSERT INTO users (id, email, password, name, phone, role) VALUES (?, ?, ?, ?, ?, ?)`)
+        .run(adminId, adminEmail, hashedPassword, contactName || 'TSV Rentals', contactPhone || '', 'user');
       adminUser = { id: adminId };
     } else {
-      if (contactName) db.prepare(`UPDATE users SET name = ?, phone = ? WHERE email = ?`).run(contactName, contactPhone || '', adminEmail);
+      if (contactName) db.prepare(`UPDATE users SET name = ?, phone = ? WHERE email = ?`)
+        .run(contactName, contactPhone || '', adminEmail);
     }
+
     const id = randomUUID();
     Listings.insert.run(
       id, adminUser.id, title, type || 'house',
@@ -104,7 +110,7 @@ app.post('/api/admin/listing', async (req, res) => {
   }
 });
 
-app.put('/api/admin/listing/:id', async (req, res) => {
+app.put('/api/admin/listing/:id', (req, res) => {
   if (req.query.key !== 'tsvadmin2026') return res.status(401).json({ error: 'Unauthorized' });
   try {
     const {
@@ -131,7 +137,8 @@ app.put('/api/admin/listing/:id', async (req, res) => {
       agentLogo || null, req.params.id
     );
     if (contactName) {
-      db.prepare(`UPDATE users SET name = ?, phone = ? WHERE email = ?`).run(contactName, contactPhone || '', 'admin@tsvrentals.internal');
+      db.prepare(`UPDATE users SET name = ?, phone = ? WHERE email = ?`)
+        .run(contactName, contactPhone || '', 'admin@tsvrentals.internal');
     }
     res.json({ success: true });
   } catch (err) {
