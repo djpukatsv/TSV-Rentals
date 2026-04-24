@@ -227,7 +227,7 @@ function ListingCard({ listing, onClick }) {
           <span style={{ fontSize: 11, color: '#6b7280' }}>
             {listing.available_date ? `Avail ${listing.available_date}` : 'Avail now'}
           </span>
-          <button onClick={e => e.stopPropagation()}
+         onClick={e => { e.stopPropagation(); onClick(); }}
             style={{ background: '#1a56a0', color: 'white', border: 'none', padding: '5px 12px', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>
             View
           </button>
