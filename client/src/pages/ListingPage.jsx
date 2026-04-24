@@ -66,7 +66,7 @@ export default function ListingPage({ listing, navigate, user }) {
               {/* Agent Logo */}
               {listing.agent_logo && (
                 <div style={{ marginBottom: 10 }}>
-                  <img src={listing.agent_logo} alt="agent" style={{ height: 36, objectFit: 'contain', background: 'white', padding: '4px 8px', borderRadius: 6, border: '1px solid #e5e7eb' }} />
+                  <img src={listing.agent_logo} alt="agent" style={{ height: 60, objectFit: 'contain', background: 'white', padding: '4px 8px', borderRadius: 6, border: '1px solid #e5e7eb' }} />
                 </div>
               )}
 
