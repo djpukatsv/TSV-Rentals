@@ -215,7 +215,7 @@ function ListingCard({ listing, onClick }) {
             background: 'white', borderRadius: 6, padding: '3px 6px',
             boxShadow: '0 1px 4px rgba(0,0,0,0.2)'
           }}>
-            <img src={listing.agent_logo} alt="agent" style={{ height: 24, objectFit: 'contain', display: 'block' }} />
+            <img src={listing.agent_logo} alt="agent" style={{ height: 40, objectFit: 'contain', display: 'block' }} />
           </div>
         )}
       </div>
