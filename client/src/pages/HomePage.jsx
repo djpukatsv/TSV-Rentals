@@ -51,8 +51,9 @@ export default function HomePage({ navigate, user }) {
 
   return (
     <div className="page">
+      {/* Hero Banner */}
       <div style={{
-        background: 'linear-gradient(135deg, #0c2d5e 0%, #1a56a0 50%, #1a7a8a 100%)',
+        background: 'linear-gradient(rgba(10,30,70,0.55), rgba(10,30,70,0.55)), url(https://i.ibb.co/fdVVYpww/1000006105.png) center/cover no-repeat',
         padding: '40px 20px 32px',
         textAlign: 'center',
         position: 'relative',
@@ -74,8 +75,8 @@ export default function HomePage({ navigate, user }) {
               <option value="">All types</option>
               <option value="house">House</option>
               <option value="unit">Unit</option>
-              <option value="room">Room</option>
               <option value="apartment">Apartment</option>
+              <option value="room">Room</option>
               <option value="townhouse">Townhouse</option>
             </select>
             <select value={filters.suburb} onChange={e => handleFilter('suburb', e.target.value)}
@@ -207,6 +208,15 @@ function ListingCard({ listing, onClick }) {
             position: 'absolute', top: 8, right: 8, background: '#f59e0b',
             color: '#412402', fontSize: 11, padding: '2px 8px', borderRadius: 4, fontWeight: 600
           }}>Featured</div>
+        )}
+        {listing.agent_logo && (
+          <div style={{
+            position: 'absolute', bottom: 8, right: 8,
+            background: 'white', borderRadius: 6, padding: '3px 6px',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.2)'
+          }}>
+            <img src={listing.agent_logo} alt="agent" style={{ height: 24, objectFit: 'contain', display: 'block' }} />
+          </div>
         )}
       </div>
       <div style={{ padding: '12px 14px' }}>
