@@ -50,7 +50,7 @@ export default function ListingPage({ listing, navigate, user }) {
     <div className="page">
       <div className="container" style={{ paddingTop: 24 }}>
         <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: '#1a56a0', cursor: 'pointer', fontSize: 14, marginBottom: 16 }}>
-          Back to listings
+          ← Back to listings
         </button>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
@@ -105,15 +105,16 @@ export default function ListingPage({ listing, navigate, user }) {
             </div>
 
             {listing.description && (
-  <div className="card" style={{ padding: 20, marginBottom: 20 }}>
-    <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 10 }}>About this property</h3>
-    <div style={{ maxHeight: 220, overflowY: 'auto', paddingRight: 6 }}>
-      {listing.description.split('\n').map((line, i) => (
-        line.trim() ? <p key={i} style={{ fontSize: 14, color: '#374151', lineHeight: 1.7, marginBottom: 8 }}>{line}</p> : null
-      ))}
-    </div>
-  </div>
-)}
+              <div className="card" style={{ padding: 20, marginBottom: 20 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 10 }}>About this property</h3>
+                <div style={{ maxHeight: 220, overflowY: 'auto', paddingRight: 6 }}>
+                  {listing.description.split(/\n|(?=•)/).map((line, i) => (
+                    line.trim() ? <p key={i} style={{ fontSize: 14, color: '#374151', lineHeight: 1.7, marginBottom: 8 }}>{line.trim()}</p> : null
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="card" style={{ padding: 20, marginBottom: 20 }}>
               <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Location</h3>
               <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 12 }}>{fullAddress}</p>
