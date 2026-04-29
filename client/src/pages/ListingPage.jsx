@@ -53,7 +53,7 @@ export default function ListingPage({ listing, navigate, user }) {
           ← Back to listings
         </button>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
+        <div className="listing-grid">
           <div>
 
             <Gallery listingId={listing.id} coverImage={listing.cover_image} />
@@ -135,7 +135,7 @@ export default function ListingPage({ listing, navigate, user }) {
             )}
           </div>
 
-          <div style={{ position: 'sticky', top: 80 }}>
+          <div className="listing-enquiry-sticky">
             <div className="card" style={{ padding: 24 }}>
               {listing.agent_logo && (
                 <div style={{ textAlign: 'center', marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid #e5e7eb' }}>
@@ -195,12 +195,12 @@ function Gallery({ listingId, coverImage }) {
   }, [listingId]);
 
   if (images.length === 0) {
-    return <div style={{ height: 550, background: 'linear-gradient(135deg, #b5d4f4, #e6f1fb)', borderRadius: 10, marginBottom: 20 }} />;
+    return <div style={{ height: 300, background: 'linear-gradient(135deg, #b5d4f4, #e6f1fb)', borderRadius: 10, marginBottom: 20 }} />;
   }
 
   return (
     <div style={{ marginBottom: 20 }}>
-      <div style={{ position: 'relative', height: 550, borderRadius: 10, overflow: 'hidden' }}>
+      <div style={{ position: 'relative', borderRadius: 10, overflow: 'hidden' }} className="gallery-main">
         <img src={images[current]} alt="property" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         {images.length > 1 && (
           <div>
