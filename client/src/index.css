@@ -185,7 +185,7 @@ input, select, textarea {
 }
 
 .gallery-main {
-  height: 550px;
+  height: 650px;
 }
 
 @media (max-width: 768px) {
@@ -196,6 +196,6 @@ input, select, textarea {
     position: static;
   }
   .gallery-main {
-    height: 260px;
+    height: 320px;
   }
 }
