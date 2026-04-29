@@ -105,12 +105,15 @@ export default function ListingPage({ listing, navigate, user }) {
             </div>
 
             {listing.description && (
-              <div className="card" style={{ padding: 20, marginBottom: 20 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 10 }}>About this property</h3>
-                <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.7 }}>{listing.description}</p>
-              </div>
-            )}
-
+  <div className="card" style={{ padding: 20, marginBottom: 20 }}>
+    <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 10 }}>About this property</h3>
+    <div style={{ maxHeight: 220, overflowY: 'auto', paddingRight: 6 }}>
+      {listing.description.split('\n').map((line, i) => (
+        line.trim() ? <p key={i} style={{ fontSize: 14, color: '#374151', lineHeight: 1.7, marginBottom: 8 }}>{line}</p> : null
+      ))}
+    </div>
+  </div>
+)}
             <div className="card" style={{ padding: 20, marginBottom: 20 }}>
               <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Location</h3>
               <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 12 }}>{fullAddress}</p>
