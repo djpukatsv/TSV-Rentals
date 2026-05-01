@@ -96,6 +96,7 @@ db.exec(`
 
 // Safely add new columns to existing databases
 try { db.exec(`ALTER TABLE listings ADD COLUMN agent_logo TEXT`); } catch {}
+try { db.exec(`ALTER TABLE listings ADD COLUMN verified INTEGER DEFAULT 0`); } catch {}
 
 export const Users = {
   create: db.prepare(`INSERT INTO users (id, email, password, name, phone, role) VALUES (?, ?, ?, ?, ?, ?)`),
