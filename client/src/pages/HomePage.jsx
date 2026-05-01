@@ -79,7 +79,7 @@ export default function HomePage({ navigate, user }) {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState('grid');
-  const [mapsLoaded, setMapsLoaded] = useState(!!window.google);
+  const [mapsLoaded, setMapsLoaded] = useState(!!window.google?.maps);
   const [filters, setFilters] = useState({
     suburb: '', type: '', maxPrice: '', bedrooms: '',
     petFriendly: false, airCon: false, pool: false, garage: false,
@@ -87,13 +87,16 @@ export default function HomePage({ navigate, user }) {
   });
 
   useEffect(() => {
-    if (window.google) { setMapsLoaded(true); return; }
+    if (window.google?.maps) { setMapsLoaded(true); return; }
     const key = import.meta.env.VITE_GOOGLE_MAPS_KEY;
     if (!key) return;
+    if (document.querySelector('script[data-gmaps]')) return;
+    window.__onGoogleMapsLoaded = () => setMapsLoaded(true);
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&callback=__onGoogleMapsLoaded`;
     script.async = true;
-    script.onload = () => setMapsLoaded(true);
+    script.defer = true;
+    script.setAttribute('data-gmaps', '1');
     document.head.appendChild(script);
   }, []);
 
