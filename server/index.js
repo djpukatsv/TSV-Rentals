@@ -117,7 +117,7 @@ app.put('/api/admin/listing/:id', (req, res) => {
       title, type, price, bedrooms, bathrooms, address, suburb, postcode,
       lat, lng, description, availableDate, leaseLength,
       petFriendly, airCon, pool, garage, furnished, billsIncluded,
-      contactName, contactPhone, agentLogo
+      contactName, contactPhone, agentLogo, verified
     } = req.body;
     db.prepare(`
       UPDATE listings SET
@@ -125,7 +125,7 @@ app.put('/api/admin/listing/:id', (req, res) => {
         address=?, suburb=?, postcode=?, lat=?, lng=?,
         description=?, available_date=?, lease_length=?,
         pet_friendly=?, air_con=?, pool=?, garage=?,
-        furnished=?, bills_included=?, agent_logo=?
+        furnished=?, bills_included=?, agent_logo=?, verified=?
       WHERE id=?
     `).run(
       title, type, parseInt(price) || 0, parseInt(bedrooms) || 0, parseInt(bathrooms) || 0,
@@ -134,7 +134,7 @@ app.put('/api/admin/listing/:id', (req, res) => {
       description || null, availableDate || null, leaseLength || null,
       petFriendly ? 1 : 0, airCon ? 1 : 0, pool ? 1 : 0,
       garage ? 1 : 0, furnished ? 1 : 0, billsIncluded ? 1 : 0,
-      agentLogo || null, req.params.id
+      agentLogo || null, verified ? 1 : 0, req.params.id
     );
     if (contactName) {
       db.prepare(`UPDATE users SET name = ?, phone = ? WHERE email = ?`)
