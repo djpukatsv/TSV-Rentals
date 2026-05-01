@@ -18,7 +18,7 @@ const empty = {
   petFriendly: false, airCon: false, pool: false, garage: false,
   furnished: false, billsIncluded: false,
   contactName: 'TSV Rentals', contactPhone: '',
-  agentLogo: ''
+  agentLogo: '', verified: false
 };
 
 export default function AdminPage({ navigate }) {
@@ -79,7 +79,8 @@ export default function AdminPage({ navigate }) {
       billsIncluded: listing.bills_included === 1,
       contactName: listing.landlord_name || 'TSV Rentals',
       contactPhone: listing.landlord_phone || '',
-      agentLogo: listing.agent_logo || ''
+      agentLogo: listing.agent_logo || '',
+      verified: listing.verified === 1
     });
     window.scrollTo(0, 0);
   }
@@ -280,7 +281,7 @@ export default function AdminPage({ navigate }) {
             <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>Features</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
               {chk('Pet friendly', 'petFriendly')}
-              {chk('Air conditioning', 'airCon')}
+              {chk('Air conditioning','airCon')}
               {chk('Pool', 'pool')}
               {chk('Garage', 'garage')}
               {chk('Furnished', 'furnished')}
@@ -295,7 +296,7 @@ export default function AdminPage({ navigate }) {
           </div>
 
           {/* Agent Logo */}
-          <div style={{ background: '#fff7ed', borderRadius: 8, padding: 16, marginBottom: 20 }}>
+          <div style={{ background: '#fff7ed', borderRadius: 8, padding: 16, marginBottom: 14 }}>
             <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Agency Logo (optional)</p>
             <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 10 }}>Upload logo to imgbb.com and paste the URL here</p>
             {inp('Logo URL', 'agentLogo', 'text', 'https://i.ibb.co/...')}
@@ -305,6 +306,32 @@ export default function AdminPage({ navigate }) {
                 <span style={{ fontSize: 12, color: '#16a34a' }}>✅ Logo preview</span>
               </div>
             )}
+          </div>
+
+          {/* Verified Toggle */}
+          <div style={{ background: '#f0f7ff', border: '1px solid #dbeafe', borderRadius: 8, padding: 16, marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V6L12 2z" fill="#1a56a0" opacity="0.2" stroke="#1a56a0" strokeWidth="1.5"/><path d="M9 12l2 2 4-4" stroke="#1a56a0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#1a56a0' }}>Verified Landlord</span>
+                </div>
+                <p style={{ fontSize: 12, color: '#6b7280', margin: 0 }}>Shows a verified badge on the listing card and enquiry panel</p>
+              </div>
+              <div
+                onClick={() => update('verified', !form.verified)}
+                style={{
+                  width: 44, height: 24, borderRadius: 12, cursor: 'pointer',
+                  background: form.verified ? '#1a56a0' : '#d1d5db',
+                  position: 'relative', transition: 'background 0.2s', flexShrink: 0
+                }}>
+                <div style={{
+                  position: 'absolute', top: 3, left: form.verified ? 23 : 3,
+                  width: 18, height: 18, borderRadius: '50%', background: 'white',
+                  transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+                }} />
+              </div>
+            </div>
           </div>
 
           {error && <p style={{ color: '#dc2626', fontSize: 13, marginBottom: 10 }}>{error}</p>}
@@ -325,7 +352,15 @@ export default function AdminPage({ navigate }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   {l.agent_logo && <img src={l.agent_logo} alt="agent" style={{ height: 28, objectFit: 'contain', borderRadius: 4 }} />}
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 500 }}>{l.title}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 14, fontWeight: 500 }}>{l.title}</span>
+                      {l.verified === 1 && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: '#e6f1fb', color: '#1a56a0', fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 20 }}>
+                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V6L12 2z" fill="#1a56a0" opacity="0.2" stroke="#1a56a0" strokeWidth="1.5"/><path d="M9 12l2 2 4-4" stroke="#1a56a0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          Verified
+                        </span>
+                      )}
+                    </div>
                     <div style={{ fontSize: 12, color: '#6b7280' }}>{l.suburb} — ${l.price}/wk — {l.bedrooms} bed</div>
                   </div>
                 </div>
