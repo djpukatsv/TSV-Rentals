@@ -181,6 +181,35 @@ export default function HomePage({ navigate, user }) {
           </div>
         ))}
       </div>
+
+      {/* Security Shield Trust Bar */}
+      <div style={{ background: '#f0f7ff', borderTop: '1px solid #dbeafe', padding: '18px 20px' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V6L12 2z" fill="#1a56a0" opacity="0.15" stroke="#1a56a0" strokeWidth="1.5"/>
+              <path d="M9 12l2 2 4-4" stroke="#1a56a0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#1a56a0' }}>Security & Trust</span>
+          </div>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            {[
+              { icon: '🔒', title: 'Industry-standard encryption', desc: 'All data is encrypted in transit and at rest using AES-256.' },
+              { icon: '🇦🇺', title: 'Australian-based security', desc: 'Your data is stored and protected under Australian privacy laws.' },
+              { icon: '✅', title: 'Verified landlords', desc: "Look for the verified badge — landlords who've completed identity checks." },
+              { icon: '🛡️', title: 'No data selling', desc: 'We never sell your personal information to third parties.' },
+            ].map((item, i) => (
+              <div key={i} style={{ flex: '1 1 180px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <span style={{ fontSize: 20 }}>{item.icon}</span>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#1e3a5f', marginBottom: 2 }}>{item.title}</div>
+                  <div style={{ fontSize: 12, color: '#6b7280', lineHeight: 1.5 }}>{item.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -208,6 +237,16 @@ function ListingCard({ listing, onClick }) {
             position: 'absolute', top: 8, right: 8, background: '#f59e0b',
             color: '#412402', fontSize: 11, padding: '2px 8px', borderRadius: 4, fontWeight: 600
           }}>Featured</div>
+        )}
+        {listing.verified === 1 && (
+          <div style={{
+            position: 'absolute', bottom: 8, left: 8, background: 'rgba(26,86,160,0.92)',
+            color: 'white', fontSize: 11, padding: '2px 8px', borderRadius: 4, fontWeight: 600,
+            display: 'flex', alignItems: 'center', gap: 4
+          }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V6L12 2z" fill="white" opacity="0.3" stroke="white" strokeWidth="1.5"/><path d="M9 12l2 2 4-4" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            Verified
+          </div>
         )}
         {listing.agent_logo && (
           <div style={{
