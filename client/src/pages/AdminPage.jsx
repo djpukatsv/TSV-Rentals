@@ -94,11 +94,27 @@ export default function AdminPage({ navigate }) {
     setSuccess('');
   }
 
+  async function geocodeAddress(address, suburb, postcode) {
+    try {
+      const query = encodeURIComponent(`${address}, ${suburb} QLD ${postcode}, Australia`);
+      const key = import.meta.env.VITE_GOOGLE_MAPS_KEY;
+      const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${key}`);
+      const data = await res.json();
+      if (data.results && data.results.length > 0) {
+        const loc = data.results[0].geometry.location;
+        return { lat: loc.lat, lng: loc.lng };
+      }
+    } catch (e) { console.warn('Geocode failed', e); }
+    return { lat: null, lng: null };
+  }
+
   async function submit() {
     setError('');
     setSuccess('');
     setLoading(true);
     try {
+      const { lat, lng } = await geocodeAddress(form.address, form.suburb, form.postcode);
+
       const url = editingId
         ? '/api/admin/listing/' + editingId + '?key=tsvadmin2026'
         : '/api/admin/listing?key=tsvadmin2026';
@@ -107,7 +123,7 @@ export default function AdminPage({ navigate }) {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify({ ...form, lat, lng })
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Something went wrong'); return; }
@@ -281,7 +297,7 @@ export default function AdminPage({ navigate }) {
             <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>Features</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
               {chk('Pet friendly', 'petFriendly')}
-              {chk('Air conditioning','airCon')}
+              {chk('Air conditioning', 'airCon')}
               {chk('Pool', 'pool')}
               {chk('Garage', 'garage')}
               {chk('Furnished', 'furnished')}
