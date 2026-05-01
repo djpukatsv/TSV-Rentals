@@ -143,7 +143,15 @@ export default function ListingPage({ listing, navigate, user }) {
                 </div>
               )}
               <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>Enquire about this property</h3>
-              <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 20 }}>Listed by {listing.landlord_name}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+                <p style={{ fontSize: 13, color: '#6b7280', margin: 0 }}>Listed by {listing.landlord_name}</p>
+                {listing.verified === 1 && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: '#e6f1fb', color: '#1a56a0', fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 20 }}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 6v6c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V6L12 2z" fill="#1a56a0" opacity="0.2" stroke="#1a56a0" strokeWidth="1.5"/><path d="M9 12l2 2 4-4" stroke="#1a56a0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    Verified Landlord
+                  </span>
+                )}
+              </div>
               {sent ? (
                 <div style={{ textAlign: 'center', padding: '20px 0' }}>
                   <p style={{ fontWeight: 500, marginBottom: 4 }}>Enquiry sent!</p>
