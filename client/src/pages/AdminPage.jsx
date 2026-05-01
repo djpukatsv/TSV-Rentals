@@ -30,6 +30,8 @@ export default function AdminPage({ navigate }) {
   const [editingId, setEditingId] = useState(null);
   const [imageFiles, setImageFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
+  const [geocodingAll, setGeocodingAll] = useState(false);
+  const [geocodeProgress, setGeocodeProgress] = useState(0);
 
   useEffect(() => { fetchListings(); }, []);
 
@@ -102,7 +104,10 @@ export default function AdminPage({ navigate }) {
       const data = await res.json();
       if (data.results && data.results.length > 0) {
         const loc = data.results[0].geometry.location;
+        console.log('Geocoded:', loc.lat, loc.lng);
         return { lat: loc.lat, lng: loc.lng };
+      } else {
+        console.warn('Geocode no results:', data.status, data.error_message);
       }
     } catch (e) { console.warn('Geocode failed', e); }
     return { lat: null, lng: null };
@@ -155,6 +160,43 @@ export default function AdminPage({ navigate }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function geocodeAll() {
+    const missing = listings.filter(l => !l.lat || !l.lng);
+    if (missing.length === 0) { alert('All listings already have coordinates!'); return; }
+    setGeocodingAll(true);
+    setGeocodeProgress(0);
+    let done = 0;
+    for (const l of missing) {
+      try {
+        const { lat, lng } = await geocodeAddress(l.address, l.suburb, l.postcode);
+        if (lat && lng) {
+          await fetch('/api/admin/listing/' + l.id + '?key=tsvadmin2026', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: l.title, type: l.type, price: l.price,
+              bedrooms: l.bedrooms, bathrooms: l.bathrooms,
+              address: l.address, suburb: l.suburb, postcode: l.postcode,
+              description: l.description, availableDate: l.available_date,
+              leaseLength: l.lease_length, petFriendly: l.pet_friendly === 1,
+              airCon: l.air_con === 1, pool: l.pool === 1, garage: l.garage === 1,
+              furnished: l.furnished === 1, billsIncluded: l.bills_included === 1,
+              agentLogo: l.agent_logo, verified: l.verified === 1,
+              contactName: l.landlord_name, contactPhone: l.landlord_phone,
+              lat, lng
+            })
+          });
+        }
+      } catch (e) { console.warn('Failed for', l.title, e); }
+      done++;
+      setGeocodeProgress(Math.round((done / missing.length) * 100));
+    }
+    setGeocodingAll(false);
+    setGeocodeProgress(0);
+    fetchListings();
+    alert(`Done! Geocoded ${missing.length} listing(s).`);
   }
 
   async function deleteListing(id) {
@@ -360,7 +402,13 @@ export default function AdminPage({ navigate }) {
         </div>
 
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Current Listings ({listings.length})</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 600 }}>Current Listings ({listings.length})</h2>
+            <button onClick={geocodeAll} disabled={geocodingAll}
+              style={{ background: geocodingAll ? '#e5e7eb' : '#1a56a0', color: geocodingAll ? '#6b7280' : 'white', border: 'none', borderRadius: 6, padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: geocodingAll ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+              🗺 {geocodingAll ? `Geocoding... ${geocodeProgress}%` : 'Geocode All'}
+            </button>
+          </div>
           {listings.map(l => (
             <div key={l.id} style={{ background: 'white', border: editingId === l.id ? '2px solid #1a56a0' : '1px solid #e5e7eb', borderRadius: 8, marginBottom: 10, overflow: 'hidden' }}>
               {l.cover_image && <img src={l.cover_image} alt={l.title} style={{ width: '100%', height: 100, objectFit: 'cover' }} />}
