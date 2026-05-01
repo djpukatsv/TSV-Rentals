@@ -31,20 +31,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-a {
-  color: var(--blue);
-  text-decoration: none;
-}
-
-button {
-  cursor: pointer;
-  font-family: inherit;
-}
-
-input, select, textarea {
-  font-family: inherit;
-  font-size: 14px;
-}
+a { color: var(--blue); text-decoration: none; }
+button { cursor: pointer; font-family: inherit; }
+input, select, textarea { font-family: inherit; font-size: 14px; }
 
 .btn {
   display: inline-flex;
@@ -59,29 +48,11 @@ input, select, textarea {
   cursor: pointer;
   transition: opacity 0.15s;
 }
-
 .btn:hover { opacity: 0.88; }
-
-.btn-primary {
-  background: var(--blue);
-  color: white;
-}
-
-.btn-amber {
-  background: var(--amber);
-  color: var(--amber-dark);
-}
-
-.btn-outline {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text);
-}
-
-.btn-sm {
-  padding: 5px 12px;
-  font-size: 13px;
-}
+.btn-primary { background: var(--blue); color: white; }
+.btn-amber { background: var(--amber); color: var(--amber-dark); }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-sm { padding: 5px 12px; font-size: 13px; }
 
 .card {
   background: var(--white);
@@ -90,112 +61,71 @@ input, select, textarea {
   overflow: hidden;
 }
 
-.badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-}
+.badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+.badge-blue { background: var(--blue-light); color: var(--blue); }
+.badge-amber { background: #fef3c7; color: #92400e; }
+.badge-green { background: #d1fae5; color: #065f46; }
 
-.badge-blue {
-  background: var(--blue-light);
-  color: var(--blue);
-}
-
-.badge-amber {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.badge-green {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-group label {
-  display: block;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-  margin-bottom: 5px;
-}
-
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 5px; }
 .form-group input,
 .form-group select,
 .form-group textarea {
-  width: 100%;
-  padding: 9px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  color: var(--text);
-  background: white;
-  outline: none;
-  transition: border-color 0.15s;
+  width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 14px; color: var(--text);
+  background: white; outline: none; transition: border-color 0.15s;
 }
-
 .form-group input:focus,
 .form-group select:focus,
-.form-group textarea:focus {
-  border-color: var(--blue);
-}
+.form-group textarea:focus { border-color: var(--blue); }
 
-.container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-.page {
-  min-height: 100vh;
-  padding-bottom: 40px;
-}
-
-.error {
-  color: var(--red);
-  font-size: 13px;
-  margin-top: 4px;
-}
-
-.tag {
-  display: inline-block;
-  background: var(--blue-light);
-  color: var(--blue);
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 10px;
-}
+.container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+.page { min-height: 100vh; padding-bottom: 40px; }
+.error { color: var(--red); font-size: 13px; margin-top: 4px; }
+.tag { display: inline-block; background: var(--blue-light); color: var(--blue); font-size: 11px; padding: 2px 8px; border-radius: 10px; }
 
 /* ── Listing page layout ─────────────────────────────────────────────────── */
-.listing-grid {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 24px;
-  align-items: start;
+.listing-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+.listing-enquiry-sticky { position: sticky; top: 80px; }
+.gallery-main { height: 700px; }
+
+/* ── Map view ────────────────────────────────────────────────────────────── */
+.map-container { height: 480px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); margin-bottom: 20px; }
+.leaflet-popup-content-wrapper { border-radius: var(--radius-sm) !important; box-shadow: 0 4px 16px rgba(0,0,0,0.15) !important; padding: 0 !important; }
+.leaflet-popup-content { margin: 0 !important; width: 200px !important; }
+.map-popup { padding: 10px 12px; cursor: pointer; }
+.map-popup-price { font-size: 15px; font-weight: 700; color: var(--blue); margin-bottom: 2px; }
+.map-popup-title { font-size: 12px; color: var(--text); margin-bottom: 2px; }
+.map-popup-sub { font-size: 11px; color: var(--text-muted); }
+
+/* ── Mobile bottom nav bar ───────────────────────────────────────────────── */
+.mobile-bottom-bar {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: white;
+  border-top: 1px solid var(--border);
+  padding: 10px 16px;
+  z-index: 200;
+  gap: 10px;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
 }
 
-.listing-enquiry-sticky {
-  position: sticky;
-  top: 80px;
-}
-
-.gallery-main {
-  height: 700px;
-}
-
+/* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .listing-grid {
-    grid-template-columns: 1fr;
-  }
-  .listing-enquiry-sticky {
-    position: static;
-  }
-  .gallery-main {
-    height: 420px;
-  }
+  .listing-grid { grid-template-columns: 1fr; }
+  .listing-enquiry-sticky { position: static; }
+  .gallery-main { height: 260px; }
+  .map-container { height: 340px; }
+  .mobile-bottom-bar { display: flex; }
+  .page { padding-bottom: 80px; }
+  .hero-search-bar { flex-direction: column; border-radius: 10px; }
+  .hero-search-bar select,
+  .hero-search-bar button { border-right: none !important; border-bottom: 1px solid #e5e7eb; width: 100%; border-radius: 0; }
+  .hero-search-bar button { border-bottom: none !important; border-radius: 0 0 10px 10px; }
+  .filter-bar { overflow-x: auto; flex-wrap: nowrap !important; padding-bottom: 4px; }
+  .filter-bar button { flex-shrink: 0; }
+  .stats-strip > div { padding: 10px 4px !important; }
+  .trust-bar { gap: 12px !important; }
+  .trust-bar > div { flex: 1 1 140px !important; }
 }
